@@ -1,0 +1,54 @@
+fr,en,Description,Format,Notes
+nbpc,npbc,Code NBPC,$6.00 ,"000000, B00000 ou > 190000 correspond à des récépissés supplémentaires d'achat"
+tonnage,tonnage,Tonnage du bateau,best12.,En tonnes
+cl_ton,tonnage.class.id,Classe de tonnage,best12.,"Voir onglet ""Cl_ton"""
+lht,length,Longueur hors-tout du bateau (LHT),best12.,En pieds
+cl_lht,length.class.id,Classe de LHT,best12.,"Voir onglet ""Cl_LHT"""
+hp,power,Puissance du moteur du bateau (HP),best12.,En HP
+cl_hp,power.class.id,Classe de HP,best12.,"Voir onglet ""Cl_HP"""
+port_att,port.home,Port d'attache,best12.,Descriptions dans fichier District.xls (\\dcqcimlna01a\bd_peches\Ziff\Documentation)
+cr_quota,management.unit,Unité de gestion ,$7.00 ,S'applique aux données produites par la région du Québec uniquement
+no_voy,trip.nr,Numéro de voyage,best12.,
+date_deb,land.date,Date de débarquement,AAAA-MM-JJ,"AAAAMM00 ou AAAAMM99 convertis en AAAAMM01
+AAAA0229 converti en AAAA0228 si non bissextile
+AAAA0631 converti en AAAA0630
+AAAA0931 converti en AAAA0930"
+div,nafo.sub,Zone unitaire de l'OPANO,$3.00 ,
+opano,nafo,Division de l'OPANO,$3.00 ,
+engin,gear,Engin de pêche,best12.,Descriptions dans fichier Codes_engin.doc (\\dcqcimlna01a\bd_peches\Ziff\Documentation)
+cl_engin,gear.class.id,Classe d'engin,best12.,1=Fixe; 2=Mobile
+port_deb,port.land,Port de débarquement,best12.,Descriptions dans fichier District.xls (\\dcqcimlna01a\bd_peches\Ziff\Documentation)
+cie_ach,buyer.firm,Code de compagnie de l'acheteur,best12.,
+cod_ach,buyer.code,Code de l'acheteur,best12.,
+cod_esp,species,Code de l'espèce capturée,best12.,"Voir onglet ""Espèces"""
+tail_esp,species.size,Code de taille de l'espèce,best12.,"Voir onglet ""Cod_tail"""
+form_esp,species.shape,Code de forme de l'espèce,best12.,"Voir onglet ""Cod_form"""
+qual_esp,species.qual,Code de qualité de l'espèce,best12.,"Voir onglet 'Cod_qual"""
+un_mes,catch.unit,Unité de mesure du poids débarqué,$1.00 ,"Voir onglet ""Un_mes"""
+pd_deb,catch.landed,Quantité débarquée,best12.,Poids de l'espèce dans sa forme débarquée
+val_deb,catch.value,Valeur au débarquement,best12.,Deux décimales
+pds_vif,catch,Équivalent de poids vif,best12.,Poids en kg de l'espèce dans sa forme ronde
+pav_eff,effort,Pavillon d'effort,$1.00 ,"""-"" pour chaque nouvel effort de pêche"
+prespcap,species.maincapt,Code de la principale espèce capturée,best12.,"Voir onglet ""Espèces"""
+prespvis,species.maintarg,Code de l'espèce visée,best12.,"Voir onglet ""Espèces"""
+frn_voy,trip.prop,Fraction de voyage,best12.,Fraction que l'effort représente par rapport à l'effort total du voyage. Une décimale.
+jr_mer,trip.seadays,Nombre de jours en mer,best12.,Une décimale
+jr_mouil,trip.landdays,Nombre de jours de mouillage,best12.,Une décimale
+jr_peche,trip.fishingdays,Nombre de jours de pêche,best12.,Deux décimales
+eff_hre,trip.fishinghours,Effort de pêche (heures),best12.,Une décimale
+nb_engin,gear.number,Nombre d'engins,best12.,
+date_cap,capt.date,Date de capture,AAAA-MM-JJ,"AAAAMM00 ou AAAAMM99 convertis en AAAAMM01
+AAAA0229 converti en AAAA0228 si non bissextile
+AAAA0631 converti en AAAA0630
+AAAA0931 converti en AAAA0930"
+cl_prof,depthclass,Classe de profondeur,best12.,"Voir onglet ""Prof"""
+region,region,Code de la région d'où origine l'enregistrement,$1.00 ,G=Golfe; N=Terre-Neuve; Q ou L=Québec; S=Maritimes
+latit_ori,lat.orig,Valeur originale de latitude (depuis 1990),best12.,Valeur originale de latitude
+longit_ori,lon.orig,Valeur originale de longitude (depuis 1990),best12.,Valeur originale de longitude
+latit_gis,lat.gis,Valeur calculée de latitude (compatible GIS) (depuis 1990),best12.,Valeur calculée de latitude (compatible GIS)
+longit_gis,lon.gis,Valeur calculée de longitude (compatible GIS) (depuis 1990),best12.,Valeur calculée de longitude (compatible GIS)
+prof,depth,Valeur brute de profondeur (depuis 2001),best12.,brasses
+quadril,region.polygon,Quadrilatère de pêche,$5.00 ,S'applique principalement aux données produites par la région du Québec
+capt_est,capt.estimated,Estimation du poids de capture par le capitaine,best12.,
+pav_mar,info,Pavillon de mariage,$1.00 ,"S'applique aux données produites par la région du Québec uniquement. Voir onglet ""Pav_mar""."
+no_log,form.id,Numéro de formulaire (depuis 2003),$8.00 ,S'applique aux données produites par la région du Québec uniquement.

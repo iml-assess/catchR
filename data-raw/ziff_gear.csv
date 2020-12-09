@@ -1,0 +1,95 @@
+engin,gear.fr,gear.en,gear.fixmob,gear.cat
+0,Valeur manquante,Null data,,NA
+1,Engin fixe,Fixed gear,F,FIX
+2,Engin mobile,Mobile gear,M,MOB
+3,Casier,Trap,F,FIX
+4,Filet maillant,Gill net,F,GN
+5,Filet maillant et ligne à main,Gill net and hand line,F,GN
+6,Drague,Dredge,M,DR
+9,Chalut à perche pour la crevette,Shrimp beam trawl,,TBB
+10,Chalut de fond à panneaux (indéterminé),Bottom otter trawl (unspecified),M,OTB
+11,Chalut de fond à panneaux (de côté),Bottom otter trawl (side),M,OTB
+12,Chalut de fond à panneaux (arrière),Bottom otter trawl (stern),M,OTB
+13,Chalut mésopélagique (indéterminé),Midwater trawl (unspecified),M,OTM
+14,Chalut mésopélagique (de côté),Midwater trawl (side),M,OTM
+15,Chalut mésopélagique (arrière),Midwater trawl (stern),M,OTM
+16,Chalut de fond boeuf,Bottom pair trawl,M,OTB
+17,Chalut pélagique boeuf,Midwater pair trawl,M,OTM
+18,Chalut semi-pélagique,Semi-midwater trawl,M,OTM
+19,Chalut à crevettes,Shrimp trawl,M,OTB
+21,Seine danoise,Danish seine,M,SDN
+22,Seine écossaise,Scottish seine,M,SDN
+23,Seine pairée (2 navires),Pair seine (2 boats),M,SDN
+24,Seine de plage,Beach and bar seine,F,SB
+25,Senne de plage modifiée,Tuck seine,F,SB
+27,Filet maillant turbot,Turbot gill net,F,GN
+28,Filet maillant morue,Cod gill net,F,GN
+29,Filet maillant maquereau,Mackerel gill net,F,GN
+30,Filet maillant hareng,Herring gill net,F,GN
+31,Seine bourse,Purse seine,M,SDN
+32,Lampara,Lampara,M,MIS
+33,Seine coulissante (boeuf),Pair seine,M,SPR
+34,Filet maillant plie,Plaice gill net,F,GN
+35,Filet dérivant hareng,Herring drift net,F,GND
+36,Filet dérivant maquereau,Mackerel drift net,F,GND
+37,Palangre morue,Cod - longline,F,LLS
+38,Palangre plie,Plaice - longline,F,LLS
+39,Palangre  flétan,Turbot  - longline,F,LLS
+40,Palangre  thon,Tuna - longline,F,LLS
+41,Filet maillant (fixe),Gillnet (set or fixed),F,GNS
+42,Filet maillant (dérivant),Gillnet (drift),F,GND
+43,Filet maillant (indéterminé),Gillnet (unspecified),F,GN
+44,Carrelet,Square net,F,MIS
+45,Parc fermé,Box net,,MIS
+46,Filet à poche,Bag net,,MIS
+47,Verveux,Fyke net,,MIS
+48,Filet haut fond,Shoal net,F,MIS
+50,Palangrotte,Setheared hooks,F,LLS
+51,Palangre,Longline,F,LLS
+52,Palangre à requin,Shark longline,F,LLS
+53,Turlutte,Jigger,F,LHM
+54,Ligne trainante,Troller lines,F,LTL
+55,Turlutte mécanique calmar,Mechanized squid jigger,F,LHM
+56,Turlutte  automatisée (ligne à main),Automated jigger  (hand line) ,F,LHM
+57,Dispositif mécanique (maquereau),Mechanical device (mackerel),F,LHM
+58,Canne et moulinet (amorçage),Rod and reel (chumming),F,LHP
+59,Ligne à main (appâtée),Hand line (baited),F,LHP
+60,Pêche à la ligne,Angling,F,LHP
+61,Trappe,Trap net,F,FPN
+62,Casier non spécifié,Pot ,F,FPN
+63,Fascine,Weir,F,FWR
+64,Carrelet fixe,Stationary lift nets,F,MIS
+65,Vivier à homard,Lobster pound,F,FPN
+66,Casier japonais,Japanese trap,F,FPO
+67,Casier rectangulaire,Rectangular trap,F,FPO
+68,Casier conique,Conical trap,F,FPO
+69,Casier pyramidal,Pyramidal trap,F,FPO
+70,Épuisette,Dip net,,MIS
+71,Drague non spécifiée,Dredge (boat),,DRB
+72,Drague à main / Râteau hydraulique,Dredge (hand) / Hydraulic rake,,DRH
+73,Engin mécanisé,Automatic gear,F,MIS
+74,Drague hydraulique à convoyeur,Hydraulic device,M,MIS
+75,Plongée avec outil manuel,Diving with hand tool,F,MIS
+76,Câble,Rope,,MIS
+77,Drague à concombre de mer,Sea Cucumber drag,M,DR
+78,Casier à crabe commun (3 pieds),Rock crab trap (3 feet),F,FPO
+79,Casier à crabe commun (4 pieds),Rock crab trap (4 feet),F,FPO
+80,Casier conique (3 pieds),Conical trap (3 feet),F,MIS
+81,Harpon et lance,Harpoon and spear,M,MIS
+82,Pêche (chasse) du phoque,Seal hunting,F,MIS
+83,Foène,Spear,,MIS
+84,Nasse à anguille,Eel pot,F,FPO
+85,Harpon électrique,Electric harpoon,M,HAR
+86,Baril de Myxine du nord,Hagfish Barrel,F,MIS
+87,Casier conique (4 pieds),,F,FIX
+88,"Casier à buccin (0,15 mètre cube et moins)",Trap net less than 0.15 m3,F,FIX
+89,"Casier à buccin (0,16 à 0,30 mètre cube)",Trap net 0.16 m3 to 0.30 m3,F,FIX
+90,Divers,Miscellaneous,F,MIS
+91,Râteaux et pinces,Rakes and tongs,F,MIS
+92,Viviers,Retaining Ponds,F,FPN
+93,Râteau traînant,Drag rake,M,MIS
+94,Coupeur,Cutter,,MIS
+95,Bateau à déchargement,Pumper,,MIS
+96,Main et outils à main,Hand and hand held tools,F,MIS
+98,Mélange de casiers,Mixed of trap - crab,F,FIX
+99,Engin non spécifié,Unspecified fixed gear,,MIS

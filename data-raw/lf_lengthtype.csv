@@ -1,0 +1,5 @@
+grp_mes,fr,en
+1,longeur_totale,total_length
+2,longeur_fourche,fork_length
+3,longeur_standard,standard_length
+4,longeur_étêté,headless_length

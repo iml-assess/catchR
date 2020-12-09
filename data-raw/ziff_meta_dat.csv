@@ -1,0 +1,58 @@
+en,fr,details,col,notes
+nbpc,codeNBPC,Code NBPC,01-Jun,000000 ou > 190000 correspond à des récépissés supplémentaires d'achat
+vessel.tonne,tonnage,Tonnage du bateau,07-Nov,En tonnes
+vessel.tonneclass,tonnageClasse,Classe de tonnage,12-Dec,"Voir onglet ""Cl_ton"""
+vessel.length,longueur,Longueur hors-tout du bateau (LHT),13-15,En pieds
+vessel.lengthclass,longueurClasse,Classe de LHT,16-16,"Voir onglet ""Cl_LHT"""
+vessel.power,puissance,Puissance du moteur du bateau (HP),17-21,En HP
+vessel.powerclass,puissanceClasse,Classe de HP,22-22,"Voir onglet ""Cl_HP"""
+port.home,portAttache,Port d'attache,23-27,Descriptions dans fichier District.xls (S:\Ziff\Documentation)
+circonscriptionElectAttache,circonscriptionElectAttache,Circonscription électorale fédérale d'attache,28-30,Champ intégré au format original du ziff mais d'aucune utilité pour les Sciences
+pavillion,PavillonGolfe,Pavillon de base dans Golfe,31-31,0=Basé dans le Golfe; 1=Non basé dans le Golfe
+vessel.firm,cieBateau,Code de compagnie du bateau,32-35,
+management.unit,uniteGestion,Unité de gestion ,36-42,S'applique aux données produites par la région du Québec uniquement
+trip.nr,noVoyage,Numéro de voyage,43-46,
+land.year,debAn,Date de débarquement,47-48,AA
+land.month,debMois,Date de débarquement,49-50,MM
+land.day,debJour,Date de débarquement,51-52,JJ
+nafo.zone,zoneUnitaireOPANO,Zone unitaire de l'OPANO,53-55,
+nafo.division,divisionOpano,Division de l'OPANO,56-58,
+vessel.gear,engin,Engin de pêche,59-60,Descriptions dans fichier Codes_engin.doc (\\dcqcimlna01a\bd_peches\Ziff\Documentation)
+vessel.gearclass,enginClasse,Classe d'engin,61-61,1=Fixe; 2=Mobile
+port.landings,portDeb,Port de débarquement,62-66,Descriptions dans fichier District.xls (\\dcqcimlna01a\bd_peches\Ziff\Documentation)
+circonscriptionElectDeb,circonscriptionElectDeb,Circonscription électorale fédérale du débarquement,67-69,Champ intégré au format original du ziff mais d'aucune utilité pour les Sciences
+buyer.firm,cieAcheteur,Code de compagnie de l'acheteur,70-73,
+buyer.code,acheteurCode,Code de l'acheteur,74-78,
+species,species,Code de l'espèce capturée,80-82,"Voir onglet ""Espèces"""
+species.code,tailleCode,Code de taille de l'espèce,83-83,"Voir onglet ""Cod_tail"""
+species.shape,formeCode,Code de forme de l'espèce,84-84,"Voir onglet ""Cod_form"""
+species.quality,qualiteCode,Code de qualité de l'espèce,85-85,"Voir onglet 'Cod_qual"""
+land.unit,uniteMesureDeb,Unité de mesure du poids débarqué,86-86,"Voir onglet ""Un_mes"""
+land.quantity,qteDeb,Quantité débarquée,87-95,Poids de l'espèce dans sa forme débarquée
+land.value,valeurDeb,Valeur au débarquement,96-104,Les deux derniers chiffres représentent les décimales
+land.weight,poidsVif,Équivalent de poids vif,105-113,Poids en kg de l'espèce dans sa forme ronde
+effort,pavillonEffort,Pavillon d'effort,114-114,"""-"" pour chaque nouvel effort de pêche"
+species.main,speciesPrincipale,Code de la principale espèce capturée,115-117,"Voir onglet ""Espèces"""
+species.target,speciesVisee,Code de l'espèce visée,118-120,"Voir onglet ""Espèces"""
+limit.200miles,limite200milles,Limite des 200 milles,121-121,0=Intérieur des limites; 1=Extérieur des limites
+trip.prop,fractionDeVoyage,Fraction de voyage,122-124,Fraction que l'effort représente par rapport à l'effort total du voyage
+trip.seadays,nbJourMer,Nombre de jours en mer,125-127,Le dernier chiffre représente la décimale
+trip.landdays,nbJourMouillage,Nombre de jours de mouillage,128-130,Le dernier chiffre représente la décimale
+trip.fishingdays,nbJourPeche,Nombre de jours de pêche,131-134,Les deux derniers chiffres représentent les décimales
+trip.fishinghours,nbHeurePeche,Effort de pêche (heures),135-138,Le dernier chiffre représente la décimale
+gear.number,nbEngin,Nombre d'engins,139-142,
+catch.year,captAn,Date de capture,143-144,AA
+catch.month,captMois,Date de capture,145-146,MM
+catch.day,captJour,Date de capture,147-148,JJ
+depth.class,profondeurClasse,Classe de profondeur,149-149,"Voir onglet ""Prof"""
+region.ziff,regionZiff,Code de la région d'où origine l'enregistrement,150-150,G=Golfe; N=Terre-Neuve; Q=Québec; S=Maritimes
+lat4,latitude4,Latitude de capture (à partir de 1991 et jusqu'en 1998),151-154,ddmm
+lon4,longitude4,Longitude de capture (à partir de 1991 et jusqu'en 1998),155-158,ddmm
+fisher.id,noCartePeche,Numéro de carte de pêche,161-161,S'applique aux données produites par la région du Québec uniquement
+region.polygon,quadrilaterePeche,Quadrilatère de pêche,162-166,S'applique aux données produites par la région du Québec uniquement
+capt.estimated,captEstimeeParCapitaine,Estimation du poids de capture par le capitaine,167-175,
+info,pavillonMariage,Pavillon de mariage,176-176,"S'applique aux données produites par la région du Québec uniquement. Voir onglet ""Pav_mar""."
+form.id,noFormulaire,Numéro de formulaire (depuis 2003),182-189,
+lat6,latitude6,Latitude de capture (depuis 1999),191-196,ddmm.mm
+lon6,longitude6,Longitude de capture (depuis 1999),198-203,ddmm.mm
+depth.raw,profondeurBrasse,Valeur brute de profondeur (depuis 2001),205-210,brasses

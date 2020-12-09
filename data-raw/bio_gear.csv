@@ -1,0 +1,40 @@
+engin,engin_en,gear.cat,code_nr
+Pièges aériens,Aerial traps,FAR,08.6.0
+Eperviers,Cast nets,FCN,06.1.0
+Autres engins retombants (non spécifiés),Falling gear (not specified),FG,06.9.0
+Pièges (non spécifiés),Traps (not specified),FIX,08.9.0
+Filets-pièges fixes non couverts,Stationary uncovered pound nets,FPN,08.1.0
+Nasses (casiers),Pots,FPO,08.2.0
+Filets à l'étalage (diables),Stow nets,FSN,08.4.0
+"Barrages, parcs, bordigues, etc.","Barriers, fences, weirs, etc.",FWR,08.5.0
+Verveux,Fyke nets,FYK,08.3.0
+Filets maillants et filets emmêlants (non spécifiés),Gillnets and entangling nets (not specified),GEN,07.9.0
+Filets maillants (non spécifiés),Gillnets (not specified),GN,07.9.1
+Filets maillants encerclants,Encircling gillnets,GNC,07.3.0
+Filets maillants dérivants (filets dérivants),Driftnets,GND,07.2.0
+Filets maillants fixes (sur perches),Fixed gillnets (on stakes),GNF,07.4.0
+Filets maillants calés (ancrés),Set gillnets (anchored),GNS,07.1.0
+Trémails et filets maillants combinés,Combined gillnets-trammel nets,GTN,07.6.0
+Lignes à main et lignes avec cannes (mécanisées)1,Handlines and pole-lines (mechanized)2,LHM,09.2.0
+Lignes à main et lignes à cannes (manoeuvrées à la main)1,Handlines and pole-lines (hand-operated)2,LHP,09.1.0
+Palangres (non spécifiées),Longlines (not specified),LL,09.5.0
+Palangres dérivantes,Drifting longlines,LLD,09.4.0
+Palangres calées,Set longlines,LLS,09.3.0
+Filets soulevés (non spécifiés),Lift nets (not specified),LN,05.9.0
+Filets soulevés manoeuvrés du bateau,Boat-operated lift nets,LNB,05.2.0
+Filets soulevés portatifs,Portable lift nets,LNP,05.1.0
+Filets soulevés fixes manoeuvrés du rivage,Shore-operated stationary lift nets,LNS,05.3.0
+Lignes de traîne,Trolling lines,LTL,09.6.0
+Hameçons et lignes (non spécifiés)2,Hooks and lines (not specified)3,LX,09.9.0
+Seine bourse,Purse seine,PS,
+Lampara,Lampara,LA,
+Engin non spécifié,Unspecified fixed gear,MIS,
+Engin non spécifié,Unspecified fixed gear,NK,
+Chalut de fond à panneaux ,Bottom otter trawl,OTB,
+Chalut pélagique,Midwater trawl,OTM,
+Seine de plage,Beach and bar or tuck seine,SB,
+Seine pairée (2 navires),"Danisch, Scottish or Pair seine (2 boats)",SDN,
+Seine coulissante (boeuf),Pair seine,SPR,
+,,ST2,
+,,TS,
+,,TXS,

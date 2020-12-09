@@ -1,0 +1,9 @@
+cl_ton,tonnage.class
+NA,Not Known
+1,0-24.9 (Canada only)
+2,25-49.9 (Canada only)
+3,50-149.9
+4,150-499.9
+5,500-999.9
+6,1000-1999.9
+7,2000 & over

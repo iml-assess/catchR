@@ -1,0 +1,9 @@
+etat_deb,en,fr,conversion_cod,conversion_mackerel
+1,Round,Rond,1,1
+2,Eviscerated with head,Éviscéré non-étêt,1.2,NA
+3,Eviscerated headless,Éviscéré étêté,1.6,NA
+4,Without tail,Sans queue,NA,NA
+5,Bled,Saigné,NA,NA
+6,Split,Fendu,NA,NA
+9,Other,Autres,1,1
+NA,Unknown,Inconnu,1,1
