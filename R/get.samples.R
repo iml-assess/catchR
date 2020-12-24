@@ -1,17 +1,26 @@
-##' catch-at-age raw: return length frequencies and raw age-length keys
+##' get samples: return length frequencies and age-length keys corresponding to the catch from a period, gear and region
 ##' @param catch data.frame with columns  year,period,region,gear,catch
 ##' @param lf data.frame with columns year,period,region,gear,length,weight.sample,n, sample.id
 ##' @param al data.frame with columns year,period,region,gear,length,age,sample.id
 ##' @param tresh.al threshold of minimum number of samples required for age length
 ##' @param tresh.al threshold of minimum number of samples required for length frequencies
 ##' @param period.unit whether catch and lf are grouped by month or quarter
-##' @details diffuses catch into length classes
+##' @details 
+#' Attributes length and age data to catch based on the nearest levels (see 12 steps). Used to calculate catch-at-age and length-frequency distributions.
+#' 
+#' When catch in a certain year is not attributed to a certain region, gear or period, all samples are taken (e.g., catch with no gear will have samples that could be from any gear)
+#' Age-length keys can have missing values. Predictions are made based on a multivariate normal distribution, and are presumed to have a precision of 0,001. 
+#' Steps:
+#'  \enumerate{
+#'    \item to fill
+#'    \item{...}
+#' }
 ##' @importFrom  data.table rbindlist
 ##' @importFrom nnet multinom
 ##' @importFrom plyr ddply
-##' @rdname caa.raw
+##' @rdname get.samples
 ##' @export
-caa.raw <- function(catch,lf,al,tresh.al=2,tresh.lf=2,period.unit=c('month','quarter')){
+get.samples <- function(catch,lf,al,tresh.al=2,tresh.lf=2,period.unit=c('month','quarter')){
 
     cacol <- c('year','period','region','gear','catch')
     lfcol <- c('year','period','region','gear','sample.id','length','weight.sample','n')
@@ -143,7 +152,7 @@ caa.raw <- function(catch,lf,al,tresh.al=2,tresh.lf=2,period.unit=c('month','qua
     })
     ret <- rbindlist(ret,fill=TRUE)          # automatically fills missing ages for certain grouping      
     ret <- as.data.frame(ret)
-    ret[is.na(ret)] <- 0                     # some ages can be missing for a certain catch -> set to 0
+    ret[is.na(ret[,grep('X',names(ret))]),grep('X',names(ret))] <- 0  # some ages can be missing for a certain catch -> set to 0
     return(ret)
 }
 

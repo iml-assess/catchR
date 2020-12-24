@@ -4,18 +4,20 @@
 \alias{read.nafoA}
 \title{read nafoA csv file}
 \usage{
-read.nafoA(file)
+read.nafoA(file, year = NULL, species = NULL)
 }
 \arguments{
-\item{path}{path to which to download raw files}
+\item{file}{file name}
 
 \item{year}{vector of years to read (all by default)}
 
-\item{overwrite}{download again? see Details}
+\item{species}{species name(s)}
 }
 \description{
 read nafoA csv file
 }
 \details{
-Load and clean downloaded csv data from https://www.nafo.int/Data/STATLANT
+Read csv file downloaded from from https://www.nafo.int/Data/STATLANT. Data is cleaned so that it is conform with other DFO data (ziff, carbio, length-frequencies)
+
+See find.species to get the species names used in the database
 }

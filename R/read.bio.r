@@ -1,12 +1,14 @@
 ##' Read bio data 
 ##' @param ... arguments to read_fwf (e.g., file, progress, skip_empty_rows,n_max)
+##' @param year vector of years to read (all by default)
 ##' @param species see details
 ##' @param language en or fr (english by default)
-##' @details read bio data from Peche SAS program. 
-##' currently only mackerel and cod are supported
+##' @details 
+#' Read bio data from Peche SAS program. 
+#' Currently only mackerel and cod are supported (To add a species: fill in data_raw/bio_key.csv)
 ##' @import lubridate readr
 ##' @export
-read.bio <- function(...,species=c('cod','mackerel'),language=c('en','fr')) {
+read.bio <- function(...,year=NULL,species=c('cod','mackerel'),language=c('en','fr')) {
 
     species <- match.arg(species)
     language <- match.arg(language)
@@ -16,6 +18,8 @@ read.bio <- function(...,species=c('cod','mackerel'),language=c('en','fr')) {
     id  <- setNames(split(key[,c('start','end')], seq(nrow(key))), key[,language])              # transform key into named list
     bio <- read_fwf(..., do.call(fwf_cols,id))   
     bio <- as.data.frame(bio)
+    
+    if(!is.null(year)) bio <- bio[bio$year %in% year,]
 
     # add date stuff
     temp <- with(key,c(which(en=='year'),which(en=='month'),which(en=='day')))

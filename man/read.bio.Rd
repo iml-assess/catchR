@@ -4,10 +4,17 @@
 \alias{read.bio}
 \title{Read bio data}
 \usage{
-read.bio(..., species = c("cod", "mackerel"), language = c("en", "fr"))
+read.bio(
+  ...,
+  year = NULL,
+  species = c("cod", "mackerel"),
+  language = c("en", "fr")
+)
 }
 \arguments{
 \item{...}{arguments to read_fwf (e.g., file, progress, skip_empty_rows,n_max)}
+
+\item{year}{vector of years to read (all by default)}
 
 \item{species}{see details}
 
@@ -17,6 +24,6 @@ read.bio(..., species = c("cod", "mackerel"), language = c("en", "fr"))
 Read bio data
 }
 \details{
-read bio data from Peche SAS program. 
-currently only mackerel and cod are supported
+Read bio data from Peche SAS program. 
+Currently only mackerel and cod are supported (To add a species: fill in data_raw/bio_key.csv)
 }

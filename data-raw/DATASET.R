@@ -33,6 +33,7 @@ usethis::use_data(ziff_meta_csv,
                   bio_key,
                   bio_matur,
                   bio_zones,
+                  base_species,
                   internal = TRUE, overwrite = TRUE)
 
 

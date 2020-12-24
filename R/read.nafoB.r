@@ -1,6 +1,7 @@
 ##' read nafoB files
 ##' @param path path to which to download raw files
 ##' @param year vector of years to read (all by default)
+##' @param species species name(s)
 ##' @param overwrite download again? see Details
 ##' @importFrom rvest html_nodes html_attr
 ##' @importFrom readr read_lines
@@ -10,9 +11,10 @@
 ##' @details 
 ##' Download data from https://www.nafo.int/Data/Catch-Statistics
 ##' If overwrite = FALSE and downloaded data is already at specified path, just read the local data
+##' See find.species to get the species names used in the database
 ##' @rdname read.nafoB
 ##' @export
-read.nafoB <- function(path,year=NULL,overwrite=FALSE){
+read.nafoB <- function(path,year=NULL,species=NULL,overwrite=FALSE){
     site <- 'https://www.nafo.int'
     page <- read_html(paste0(site,'/Data/Catch-Statistics'))
     
@@ -119,6 +121,7 @@ read.nafoB <- function(path,year=NULL,overwrite=FALSE){
     nafo <- rbindlist(nafo,fill=TRUE)                # for speed
     nafo <- as.data.frame(nafo)
     if(!is.null(year)) nafo <- nafo[nafo$year %in% year,]
+    if(!is.null(species)) nafo <- nafo[tolower(nafo$species.name) %in% tolower(species),]
 
     # reformat month so numeric column
     nafo <- gather(nafo,'month','catch',c('month_nk',tolower(month.abb)))

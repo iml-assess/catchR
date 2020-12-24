@@ -4,25 +4,14 @@
 \alias{read.ziff}
 \title{read ziff files}
 \usage{
-read.ziff(
-  speciescode,
-  species,
-  year = NULL,
-  language = c("en", "fr"),
-  format = c("csv", "dat"),
-  ...
-)
+read.ziff(speciescode, species, year = NULL, language = c("en", "fr"), ...)
 }
 \arguments{
-\item{speciescode}{species code (numeric, for total csv file)}
+\item{speciescode}{numeric species code}
 
-\item{species}{species name (character string, for species specific dat files)}
+\item{year}{vector of years to read}
 
-\item{year}{vector of years to read (all by default)}
-
-\item{language}{en or fr (english by default)}
-
-\item{format}{data format (old dat or new csv)}
+\item{language}{en or fr}
 
 \item{...}{arguments to list.files (e.g., path)}
 }
@@ -30,7 +19,15 @@ read.ziff(
 read ziff files
 }
 \details{
-Two ziff formats are supported; \cr
-old dat format: z_180_....espece.dat -> S:/Ziff/POISSON/DONNEES/ \cr
-new csv format: Version_totale_....csv -> \\ dcqcimlna01a \ BD_Peches \ Ziff \ Format CSV \ Fichiers de données
+Reads ziff files in csv format. The original names of the files are presumed (Version_totale_...).
+
+Available from \\ dcqcimlna01a \ BD_Peches \ Ziff \ Format CSV \ Fichiers de donnees
+
+See find.species to get the species names/codes used in the database.
+
+Notes:
+ \enumerate{
+   \item sub opanos all capitalised to ensure consistency with other databases
+   \item{year / doy / month are from catch, unless info only available for landings }
+}
 }
