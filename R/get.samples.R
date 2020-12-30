@@ -15,7 +15,7 @@
 #'    \item to fill
 #'    \item{...}
 #' }
-##' @importFrom  data.table rbindlist
+##' @import  data.table lubridate
 ##' @importFrom nnet multinom
 ##' @importFrom plyr ddply
 ##' @rdname get.samples
@@ -87,6 +87,7 @@ get.samples <- function(catch,lf,al,tresh.al=2,tresh.lf=2,period.unit=c('month',
             age.key <- with(this.al,table(length,age))                                      # age key for this group
             n.fish  <- rowSums(age.key)                                                     # store info on number of fish
             age.key <- prop.table(age.key,1)                                                # get proportions
+            colnames(age.key) <- paste0('age.',colnames(age.key))                           # easier to understand and facilitates use of reshape
             age.key <- data.frame(length=as.numeric(rownames(age.key)),                     # get a df with all the info
                                   n.agekey=n.fish,
                                   as.data.frame.matrix(age.key))
@@ -108,17 +109,19 @@ get.samples <- function(catch,lf,al,tresh.al=2,tresh.lf=2,period.unit=c('month',
             warning('impossible to reach threshold')
             lf.key <- data.frame(length=-1,n.lf=0,prop=0,weight.sample=0,weight.unit=0)
         }else{
-            lf.key <- ddply(this.lf,c('length'),summarise,                                  # for selected samples, get MEAN weight and propotion (so each sample has equal weight)
-                            n.lf=sum(n),
-                            prop=mean(prop),
-                            weight.sample=sum(weight.sample),
-                            weight.unit=mean(weight.unit))
+             n.l=aggregate(n~length,data=this.lf,sum)                                      # for selected samples, get MEAN weight and propotion (so each sample has equal weight)
+             prop=aggregate(prop~length,data=this.lf,mean)
+             weight.sample=aggregate(weight.sample~length,data=this.lf,sum)
+             weight.unit=aggregate(weight.unit~length,data=this.lf,mean)
+
+            lf.key <- Reduce(function(...) merge(...), list(n.l, prop, weight.sample, weight.unit))
+            names(lf.key)[2] <- 'n.lf'
         }
         
         #####  3) bind and fill up the gaps ####################################################################################
         # A bind
         ret <- merge(lf.key,age.key,all = T)
-        cola <- grep('X',names(ret))                                           # columns with ages
+        cola <- grep('age\\.',names(ret))                                           # columns with ages
         
         # B fill  (here I deviate from JOP by using just round to avoid unlikely probabilities)
         if(any(is.na(ret[,cola]))){
@@ -134,13 +137,13 @@ get.samples <- function(catch,lf,al,tresh.al=2,tresh.lf=2,period.unit=c('month',
             ret[is.na(ret$n.agekey),'n.agekey'] <- 0                                     # there were 0 age key samples
         }
 
-        ret[is.na(ret$n),names(lf.key)[-1]] <- 0                                         # when there are lenghts in the alk that are not in the length frequencies -> keep them but give 0 weight
+        ret[is.na(ret$n.lf),names(lf.key)[-1]] <- 0                                         # when there are lenghts in the alk that are not in the length frequencies -> keep them but give 0 weight
         
         #####  4) return it all ####################################################################################
         ret <- cbind(id = x, 
                      catch[x, cacol[1:5]][rep(1, nrow(ret)),], 
                      ret,
-                     n.lftot = sum(lf.key$n),
+                     n.lftot = sum(lf.key$n.lf),
                      weight.sample.tot = sum(lf.key$weight.sample),
                      nsample.lengthfreq = n.lf,
                      nsample.agelength = n.al,
@@ -152,7 +155,8 @@ get.samples <- function(catch,lf,al,tresh.al=2,tresh.lf=2,period.unit=c('month',
     })
     ret <- rbindlist(ret,fill=TRUE)          # automatically fills missing ages for certain grouping      
     ret <- as.data.frame(ret)
-    ret[is.na(ret[,grep('X',names(ret))]),grep('X',names(ret))] <- 0  # some ages can be missing for a certain catch -> set to 0
+    cola <- grep('age\\.',names(ret))
+    ret[cola ][is.na(ret[cola])] <- 0        # some ages can be missing for a certain catch -> set to 0
     return(ret)
 }
 
