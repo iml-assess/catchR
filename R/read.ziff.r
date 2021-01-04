@@ -1,6 +1,6 @@
 ##' read ziff files
 ##' @param speciescode numeric species code
-##' @param year vector of years to read
+##' @param year vector of years to read (ex: 2015:2020)
 ##' @param language en or fr
 ##' @param ... arguments to list.files (e.g., path)
 ##' @import readr lubridate 
