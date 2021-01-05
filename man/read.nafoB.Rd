@@ -2,24 +2,24 @@
 % Please edit documentation in R/read.nafoB.r
 \name{read.nafoB}
 \alias{read.nafoB}
-\title{read nafoB files}
+\title{Read NAFO 21B data}
 \usage{
 read.nafoB(path, year = NULL, species = NULL, overwrite = FALSE)
 }
 \arguments{
-\item{path}{path to which to download raw files}
+\item{path}{Path to which to download raw files.}
 
-\item{year}{vector of years to read (all by default)}
+\item{year}{Vector of years to read (all by default).}
 
-\item{species}{species name(s)}
+\item{species}{species name(s). Ex: 101 for Atlantic cod.}
 
-\item{overwrite}{download again? see Details}
+\item{overwrite}{If overwrite = FALSE (default) and downloaded data is already at specified path, the function will just read the local data. If overwrite = TRUE, the function will over-write data.}
 }
 \description{
-read nafoB files
+Read NAFO 21B data
 }
 \details{
-Download data from https://www.nafo.int/Data/Catch-Statistics
-If overwrite = FALSE and downloaded data is already at specified path, just read the local data
-See find.species to get the species names used in the database
+Download data from https://www.nafo.int/Data/Catch-Statistics.
+
+See find.species to get the species names used in the database.
 }
