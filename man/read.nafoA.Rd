@@ -2,22 +2,22 @@
 % Please edit documentation in R/read.nafoA.r
 \name{read.nafoA}
 \alias{read.nafoA}
-\title{read nafoA csv file}
+\title{Read NAFO 21A database data stored in a .csv file}
 \usage{
 read.nafoA(file, year = NULL, species = NULL)
 }
 \arguments{
-\item{file}{file name}
+\item{file}{.csv file name to read.}
 
-\item{year}{vector of years to read (all by default)}
+\item{year}{Vector of years to read (ex: 2015:2020, c(2001, 2003:2018)). By default, the function will keep all years found in the file.}
 
-\item{species}{species name(s)}
+\item{species}{species name(s). Ex: "ATLANTIC COD - COD" for Atlantic cod.}
 }
 \description{
-read nafoA csv file
+Read NAFO 21A database data stored in a .csv file
 }
 \details{
-Read csv file downloaded from from https://www.nafo.int/Data/STATLANT. Data is cleaned so that it is conform with other DFO data (ziff, carbio, length-frequencies)
+Read .csv file downloaded from from https://www.nafo.int/Data/STATLANT. Data is cleaned so that it is conform with other DFO data (ziff, carbio, length-frequencies).
 
-See find.species to get the species names used in the database
+See find.species to get the species names used in the database.
 }
