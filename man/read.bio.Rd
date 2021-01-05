@@ -2,28 +2,25 @@
 % Please edit documentation in R/read.bio.r
 \name{read.bio}
 \alias{read.bio}
-\title{Read bio data}
+\title{Reads biological data}
 \usage{
-read.bio(
-  ...,
-  year = NULL,
-  species = c("cod", "mackerel"),
-  language = c("en", "fr")
-)
+read.bio(file, year = NULL, species, language = "en", ...)
 }
 \arguments{
-\item{...}{arguments to read_fwf (e.g., file, progress, skip_empty_rows,n_max)}
+\item{file}{.dat file to read. This file is the output of this SAS program: S:/SAS/Peche/autoexec_peche.sas.}
 
-\item{year}{vector of years to read (all by default)}
+\item{year}{Vector of years to read (ex: 2015:2020). NULL by default, meaning the function will keep data from all available years.}
 
-\item{species}{see details}
+\item{species}{Either "cod" or "mackerel".}
 
-\item{language}{en or fr (english by default)}
+\item{language}{Language to use for column names, either "en" (default) or "fr".}
+
+\item{...}{Arguments used with read_fwf() (e.g., progress, skip_empty_rows, n_max).}
 }
 \description{
-Read bio data
+Reads biological data
 }
 \details{
-Read bio data from Peche SAS program. 
-Currently only mackerel and cod are supported (To add a species: fill in data_raw/bio_key.csv)
+Read biological data from dockside monitoring. 
+Currently only mackerel and Atlantic cod are supported (To add a species: fill in data_raw/bio_key.csv)
 }
