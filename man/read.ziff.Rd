@@ -2,32 +2,28 @@
 % Please edit documentation in R/read.ziff.r
 \name{read.ziff}
 \alias{read.ziff}
-\title{read ziff files}
+\title{read ZIFF files}
 \usage{
-read.ziff(speciescode, species, year = NULL, language = c("en", "fr"), ...)
+read.ziff(sp, path, year = NULL, language = "fr")
 }
 \arguments{
-\item{speciescode}{numeric species code}
+\item{sp}{Numeric species code (ex: 100 for Atlantic cod). Can also be a vector of multiple numeric species codes.}
 
-\item{year}{vector of years to read}
+\item{path}{Directory where files to read are located. Ex: "//dcqcimlna01a/BD_Peches/Ziff/Format CSV/Fichiers de données/".}
 
-\item{language}{en or fr}
+\item{year}{Vector of years to read (ex: 2015:2020). NULL by default, meaning the function will keep data from all available years.}
 
-\item{...}{arguments to list.files (e.g., path)}
+\item{language}{Language to use for column names, either "fr" (default) or "en".}
 }
 \description{
-read ziff files
+read ZIFF files
 }
 \details{
-Reads ziff files in csv format. The original names of the files are presumed (Version_totale_...).
-
-Available from \\ dcqcimlna01a \ BD_Peches \ Ziff \ Format CSV \ Fichiers de donnees
-
-See find.species to get the species names/codes used in the database.
+This function reads Zonal Interchange File format (ZIFF) data from .csv files "Version_totale", available from: //dcqcimlna01a/BD_Peches/Ziff/Format CSV/Fichiers de données/.
 
 Notes:
  \enumerate{
-   \item sub opanos all capitalised to ensure consistency with other databases
-   \item{year / doy / month are from catch, unless info only available for landings }
+   \item{NAFO Divisions and Subareas all capitalised to ensure consistency with other databases}
+   \item{year, trimester and month values are from catch dates. If no catch date is provided, the landing date is used instead.}
 }
 }
