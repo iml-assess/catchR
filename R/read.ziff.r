@@ -55,9 +55,6 @@ read.ziff <- function(sp, path, year = NULL, language = "fr"){
    ziff$annee <- with(ziff, ifelse(is.na(date_cap), year(date_deb), year(date_cap)))
    if(!is.null(year)) ziff <- ziff[ziff$annee %in% year, ]
    ziff$annee_gestion <- ifelse(month(ziff$date_deb) <= 4 & day(ziff$date_deb) <= 15 & ziff$annee > 1999, ziff$annee - 1, ziff$annee) # starts on May 15th May since 2000
-   # ziff$doy_cap <- yday(ziff$date_cap) # useful?
-   # ziff$doy_deb <- yday(ziff$date_deb) # useful?
-   # ziff$doy     <-  with(ziff, ifelse(is.na(doy_cap), doy_deb, doy_cap)) # useful?
    ziff$mois_cap <- month(ziff$date_cap)
    ziff$mois_deb <- month(ziff$date_deb)
    ziff$mois     <- with(ziff, ifelse(is.na(mois_cap), mois_deb, mois_cap))
@@ -66,7 +63,7 @@ read.ziff <- function(sp, path, year = NULL, language = "fr"){
    ziff$trim <- with(ziff, ifelse(is.na(trim_cap), trim_deb, trim_cap))
 
    # province
-   provs <- data.frame(fr = c('inconnu', 'N-E', 'N-B', 'IPE', 'QC', 'T-N'), en = c('unknown', 'NS', 'NB', 'PEI', 'QC', 'NL'))
+   provs <- data.frame(fr = c('Inconnu', 'N-É', 'N-B', 'IPE', 'QC', 'T-N'), en = c('Unknown', 'NS', 'NB', 'PEI', 'QC', 'NL'))
    ziff$prov_att <- provs[, language][floor(ziff$port_att / 10000) + 1]
    ziff$prov_att[is.na(ziff$prov_att)] <- provs[1, language]
    ziff$prov_deb <- provs[, language][floor(ziff$port_deb / 10000) + 1]

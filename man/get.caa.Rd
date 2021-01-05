@@ -15,5 +15,6 @@ get.caa(x, plus = NULL)
 get catch-at-age: return length frequencies and raw age-length keys
 }
 \details{
-Once catch of every level is diffused (get.sampled), this function calculates caa.
+Once catch of every level is diffused (get.sampled) by length and age class, this function calculates caa.
+ So-called scores were added as an exploratory way to gauge the quality of the estimates each years.
 }
