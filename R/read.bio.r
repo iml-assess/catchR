@@ -17,8 +17,10 @@ read.bio <- function(file, year = NULL, species, language = "en", ...) {
     # read in data
     key <- bio_key[bio_key$species == species, ] # different keys depending on the species 
     id  <- setNames(split(key[, c('start', 'end')], seq(nrow(key))), key[, language]) # transform key into named list
-    bio <- read_fwf(file, do.call(fwf_cols, id), ...)   
+    bio <- read_fwf(file, col_positions = do.call(fwf_cols, id), col_types = cols(.default = "c"), ...)  
     bio <- as.data.frame(bio)
+    bio <- type.convert(bio)
+    attr(x = bio, which = "spec") <- NULL
     
     if(!is.null(year)) bio <- bio[bio$year %in% year, ]
 
