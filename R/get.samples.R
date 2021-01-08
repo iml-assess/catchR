@@ -1,177 +1,197 @@
-##' get samples: return length frequencies and age-length keys corresponding to the catch from a period, gear and region
-##' @param catch data.frame with columns  year,period,region,gear,catch
-##' @param lf data.frame with columns year,period,region,gear,length,weight.sample,n, sample.id
-##' @param al data.frame with columns year,period,region,gear,length,age,sample.id
-##' @param tresh.al threshold of minimum number of samples required for age length
-##' @param tresh.al threshold of minimum number of samples required for length frequencies
-##' @param period.unit whether catch and lf are grouped by month or quarter
+##' Return length frequencies and age-length keys corresponding to the catch from a period, gear and region to use in catch-at-age calculations
+##' @param catch Data.frame with these columns: year, period, region, gear, catch.
+##' @param lf Data.frame with these columns: year, period, region, gear, length, weight.sample, n, sample.id.
+##' @param al Data.frame with these columns: year, period, region, gear, length, age, sample.id.
+##' @param tresh.al Threshold of minimum number of samples required for age-length keys. By default = 2.
+##' @param tresh.al Threshold of minimum number of samples required for length frequencies. By default = 2.
+##' @param period.unit Whether catch and lf are grouped by "month" (default) or "quarter".
 ##' @details 
-#' Attributes length and age data to catch based on the nearest levels (see 12 steps). Used to calculate catch-at-age and length-frequency distributions.
+#' Attributes length and age data to catch based on the nearest levels (see 12 steps below). Used to calculate catch-at-age and length-frequency distributions.
 #' 
 #' When catch in a certain year is not attributed to a certain region, gear or period, all samples are taken (e.g., catch with no gear will have samples that could be from any gear)
 #' Age-length keys can have missing values. Predictions are made based on a multivariate normal distribution, and are presumed to have a precision of 0,001. 
+#' 
 #' Steps:
-#'  \enumerate{
-#'    \item to fill
-#'    \item{...}
+#' \enumerate{
+#'  \item year, period, region, gear
+#'  \item year, neighbouring period, region, gear
+#'  \item year, period, gear                 
+#'  \item year, neighbouring period, gear
+#'  \item year, neighbouring period
+#'  \item year
+#'  \item neighbouring year, period, gear, region
+#'  \item neighbouring year, neigbouring period, gear, region
+#'  \item neighbouring year, period, gear
+#'  \item neighbouring year, neigbouring period, gear
+#'  \item neighbouring year, gear
+#'  \item neighbouring year
 #' }
 ##' @import  data.table lubridate
 ##' @importFrom nnet multinom
 ##' @importFrom plyr ddply
 ##' @rdname get.samples
 ##' @export
-get.samples <- function(catch,lf,al,tresh.al=2,tresh.lf=2,period.unit=c('month','quarter')){
-
-    cacol <- c('year','period','region','gear','catch')
-    lfcol <- c('year','period','region','gear','sample.id','length','weight.sample','n')
-    alcol <- c('year','period','region','gear','length','age','sample.id')
+get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit = c('month', 'quarter')){
     
-    if(!setequal(names(catch),cacol)) stop(paste0('colnames of catch need to be: ', paste(cacol,collapse = ', ')))
-    if(!setequal(names(lf),lfcol))    stop(paste0('colnames of lf need to be: ',    paste(lfcol,collapse = ', ')))
-    if(!setequal(names(al),alcol))    stop(paste0('colnames of al need to be: ',    paste(lfcol,collapse = ', ')))
-    if(any(duplicated(catch[,cacol[1:4]]))) stop('only one catch value per level allowed')
+    # 1) Validation of the arguments
+    cacol <- c('year', 'period', 'region', 'gear', 'catch') # required columns in catch
+    lfcol <- c('year', 'period', 'region', 'gear', 'sample.id', 'length', 'weight.sample', 'n') # required columns in lf
+    alcol <- c('year', 'period', 'region', 'gear', 'length', 'age', 'sample.id') # required columns in al
+    
+    if(!setequal(names(catch), cacol)) stop(paste0('Colnames of catch need to be: ', paste(cacol, collapse = ', ')))
+    if(!setequal(names(lf), lfcol))    stop(paste0('Colnames of lf need to be: ',    paste(lfcol, collapse = ', ')))
+    if(!setequal(names(al), alcol))    stop(paste0('Colnames of al need to be: ',    paste(lfcol, collapse = ', ')))
+    if(any(duplicated(catch[, cacol[1:4]]))) stop('Only one catch value per level allowed.') # one line per level allowed
     
     period.unit <- match.arg(period.unit)
     
-    lf <- ddply(lf,lfcol[1:5],transform,prop=n/sum(n))   # proportion of each length in sample
-    lf$weight.unit <- with(lf, weight.sample/n)       # average fish weight
+    # 2) Minor calculations and variable creation
+    lf <- ddply(lf, lfcol[1:5], transform, prop = n/sum(n)) # proportion of each length in sample
+    lf$weight.unit <- with(lf, weight.sample/n) # average fish weight
     
-    lf$date <- with(lf,ymd(paste(year,period,'01')))
-    al$date <- with(al,ymd(paste(year,period,'01')))
+    lf$date <- with(lf, ymd(paste(year, period, '01')))
+    al$date <- with(al, ymd(paste(year, period, '01')))
     
-    my.levels <- sapply(c('period','region','gear'),function(x) unique(c(lf[,x],al[,x]))) # unique levels of each group
+    my.levels <- sapply(c('period', 'region', 'gear'), function(x) unique(c(lf[, x], al[, x]))) # unique levels of each group
     
-    ### for every catch row, get caa information
-    pb <- txtProgressBar(min = 0, max = nrow(catch), style = 3)
-    ret <- lapply(1:nrow(catch),function(x){
+    # 3) For each line of catch, i.e. for each combination of year-period-region-gear, get lf and al data to use in caa calculations
+    pb <- txtProgressBar(min = 0, max = nrow(catch), style = 3) # set the progress bar
+    ret <- lapply(1:nrow(catch), function(x){
         # get id and total catch
-        C <- catch[x,'catch']
-        y <- catch[x,'year']
-        p <- catch[x,'period']
-        r <- catch[x,'region']
-        g <- catch[x,'gear']
+        C <- catch[x, 'catch']
+        y <- catch[x, 'year']
+        p <- catch[x, 'period']
+        r <- catch[x, 'region']
+        g <- catch[x, 'gear']
         
-        # !! if p / r / g  is na -> the function should not automatically skip options (e.g. if only missing gear in catch data, option 1 should still be used and not 5)
+        # If p/r/g is NA, the function should not automatically skip options 
+        # (e.g. if only missing gear in catch data, option 1 should still be used and not 5)
         if(is.na(p)) p <- my.levels$period
-        if(is.na(r)) r <- my.levels$region
+        if(is.na(r)) r <- my.levels$region # Food for thought: what to do with vague NAFO subareas (ex: 4RU, where "u" stands for "undetermined")?
+        # Shall we use all other NAFO subareas in that year, or only 4RA, 4RB, 4RC...?
         if(is.na(g)) g <- my.levels$gear
         
-        # neighbouring dates/months/years 
-        d  <- ymd(paste(y,p,'01'))                        # date (for semesters this will be month 1 to 4, but that doesn't matter)
-        dn <- d                                           # !! neigbouring date; IF no period data; all periods allowed  (so option 1 and 2 are the same :/)
-        if(!is.na(catch[x,'period'])){                    # IF period data; normal way
-            dn <- d %m+% months(c(1,0,-1))                # neigbouring date
-            if(period.unit=='quarter'){                   # cheat and replace december with last quarter
-                month(dn[which(month(dn)==12)]) <- 4
+        # 3.1) Neighbouring dates/months/years 
+        d  <- ymd(paste(y, p, '01')) # date (for semesters this will be month 1 to 4, but that doesn't matter)
+        dn <- d # neigbouring dates. If no period data, all periods allowed  (so option 1 and 2 are the same)
+        if(!is.na(catch[x, 'period'])){      # If period data; normal way
+            dn <- d %m+% months(c(-1, 0, 1)) # neigbouring dates
+            if(period.unit == 'quarter'){    # cheat and replace december with last quarter
+                month(dn[which(month(dn) == 12)]) <- 4
             }       
         }
-        pn <- month(dn)                               # neigbouring period
-        yn <- y + c(1,0,-1)                           # neigbouring year
+        pn <- month(dn) # neigbouring periods
+        yn <- y + c(-1, 0, 1) # neigbouring years
         
-        #####  1) ALK samples ####################################################################################
-        # A get samples
-        o.al <- 1                           # first option
-        n.al <- 0                           # number of samples found
-        while(n.al<=tresh.al & o.al<=12){                                                   # keep looking as long as n not big enough and next step possible
-            id <- find.samples(al,o.al,d,dn,g,r,y,yn,p,pn)                                  # find samples according to step o
-            this.al <- al[id,]                                                              # select them
-            samples <- unique(apply(this.al[,alcol[1:4]], 1, paste, collapse=" "))          # count unique samples
-            n.al <- length(samples)                     
-            o.al <-  o.al+1                                                                 # go to next step
+        # 3.2) ALK samples ####
+        # 3.2.1) Get samples to be used
+        o.al <- 1 # first option
+        n.al <- 0 # number of samples found
+        while(n.al <= tresh.al & o.al <= 12){# keep looking as long as n not big enough and next step possible
+            id <- find.samples(al,o.al,d,dn,g,r,y,yn,p,pn)                               # find samples according to step o
+            this.al <- al[id,]                                                           # select them
+            samples <- unique(apply(this.al[, alcol[c(1:4, 7)]], 1, paste, collapse = " ")) # count unique samples
+            n.al <- length(samples) 
+            o.al <- o.al + 1                                                             # go to next step
         }
-        # B get key
-        if(n.al<tresh.al){
-            warning('impossible to reach threshold for age-length key')
-            age.key <- data.frame(length=-1,n.agekey=0)                                     # use -1 to indicate problems 
+        # 3.2.2) Get age-length key
+        if(n.al < tresh.al){
+            warning('Impossible to reach threshold for age-length key.')
+            age.key <- data.frame(length = -1, n.agekey = 0)                # use -1 to indicate problems 
         }else{
-            age.key <- with(this.al,table(length,age))                                      # age key for this group
-            n.fish  <- rowSums(age.key)                                                     # store info on number of fish
-            age.key <- prop.table(age.key,1)                                                # get proportions
-            colnames(age.key) <- paste0('age.',colnames(age.key))                           # easier to understand and facilitates use of reshape
-            age.key <- data.frame(length=as.numeric(rownames(age.key)),                     # get a df with all the info
-                                  n.agekey=n.fish,
+            age.key <- with(this.al, table(length, age))                    # age key for this group
+            n.fish  <- rowSums(age.key)                                     # store info on number of fish
+            age.key <- prop.table(age.key, 1)                               # get proportions
+            colnames(age.key) <- paste0('age.', colnames(age.key))          # easier to understand and facilitates use of reshape
+            age.key <- data.frame(length = as.numeric(rownames(age.key)),   # get a df with all the info
+                                  n.agekey = n.fish,
                                   as.data.frame.matrix(age.key))
         }
         
-        #####  2) LF samples ####################################################################################
-        # A get samples
-        o.lf <- 1                           # first option
-        n.lf <- 0                           # number of samples found
-        while(n.lf<=tresh.lf & o.lf<=12){
-            id <- find.samples(lf,o.lf,d,dn,g,r,y,yn,p,pn)                                  # find samples according to step o
-            this.lf <- lf[id,]                                                              # select them
-            samples <- unique(apply(this.lf[,lfcol[1:5]], 1, paste, collapse=" "))          # count unique samples
-            n.lf <- length(samples)                     
-            o.lf <-  o.lf+1                                                                 # go to next step
+        # 3.3) LF samples ####
+        # 3.3.1) Get samples to be used
+        o.lf <- 1 # first option
+        n.lf <- 0 # number of samples found
+        while(n.lf <= tresh.lf & o.lf <= 12){
+            id <- find.samples(lf,o.lf,d,dn,g,r,y,yn,p,pn)                            # find samples according to step o
+            this.lf <- lf[id, ]                                                       # select them
+            samples <- unique(apply(this.lf[, lfcol[1:5]], 1, paste, collapse = " ")) # count unique samples
+            n.lf <- length(samples)                      
+            o.lf <- o.lf + 1                                                          # go to next step
         }
-        # B get distribution
-        if(n.lf<tresh.lf){
-            warning('impossible to reach threshold')
-            lf.key <- data.frame(length=-1,n.lf=0,prop=0,weight.sample=0,weight.unit=0)
+        # 3.3.2) Get length frequency distribution
+        if(n.lf < tresh.lf){
+            warning('Impossible to reach threshold.')
+            lf.key <- data.frame(length = -1, n.lf = 0, prop = 0, weight.sample = 0, weight.unit = 0)
         }else{
-             n.l=aggregate(n~length,data=this.lf,sum)                                      # for selected samples, get MEAN weight and propotion (so each sample has equal weight)
-             prop=aggregate(prop~length,data=this.lf,mean)
-             weight.sample=aggregate(weight.sample~length,data=this.lf,sum)
-             weight.unit=aggregate(weight.unit~length,data=this.lf,mean)
+             n.l <- aggregate(n~length, data = this.lf, sum) # for selected samples, get MEAN weight and proportion (so each sample has equal weight)
+             prop <- aggregate(prop~length, data = this.lf, mean)
+             weight.sample <- aggregate(weight.sample~length, data = this.lf, sum)
+             weight.unit <- aggregate(weight.unit~length, data = this.lf, mean)
 
             lf.key <- Reduce(function(...) merge(...), list(n.l, prop, weight.sample, weight.unit))
             names(lf.key)[2] <- 'n.lf'
         }
         
-        #####  3) bind and fill up the gaps ####################################################################################
-        # A bind
-        ret <- merge(lf.key,age.key,all = T)
-        cola <- grep('age\\.',names(ret))                                           # columns with ages
+        # 3.4) Bind and fill up the gaps ####
+        # 3.4.1) Bind length frequency and age-length keys
+        ret <- merge(lf.key, age.key, all = T)
+        cola <- grep('age\\.', names(ret)) # columns with ages
         
-        # B fill  (here I deviate from JOP by using just round to avoid unlikely probabilities)
-        if(any(is.na(ret[,cola]))){
-            mod <- as.matrix(na.omit(ret[,c(1,cola)]))                                   # matrix with the age-length key
-            alen <- mod[,-1]
-            len  <- mod[,1]
-            m    <- multinom(alen~len,trace=F,maxit=1000)                                # fit model
-            if(m$convergence!=0)warning(paste0('non-convergence when filling gaps for id ',x))
-            new <- predict(m, newdata = data.frame(len = ret$length), type = "probs")    # predict for all lengths in the freq data
-            new <- round(new,3)                                                          # acceptable precision level (to avoid 0.0000001% chances of absurd age-length combos)
+        # 3.4.2) Filling the gaps
+        if(any(is.na(ret[, cola]))){ # If for a given length I don't have an age-length key
+            mod <- as.matrix(na.omit(ret[, c(1, cola)])) # matrix with the age-length key
+            alen <- mod[, -1]
+            len  <- mod[, 1]
+            m    <- multinom(alen~len, trace = F, maxit = 1000) # fit model
+            if(m$convergence != 0) warning(paste('Non-convergence when filling gaps for id', x))
+            new <- predict(m, newdata = data.frame(len = ret$length), type = "probs") # predict for all lengths in the freq data
+            new <- round(new, 3) # acceptable precision level (to avoid 0.0000001 % chances of absurd age-length combos)
             
-            ret[,cola][is.na(ret[,cola])] <- new[is.na(ret[,cola])]                      # replace Na's by predictions
-            ret[is.na(ret$n.agekey),'n.agekey'] <- 0                                     # there were 0 age key samples
+            ret[, cola][is.na(ret[, cola])] <- new[is.na(ret[, cola])] # replace NA's by predictions
+            ret[is.na(ret$n.agekey), 'n.agekey'] <- 0 # there were 0 age key samples
         }
-
-        ret[is.na(ret$n.lf),names(lf.key)[-1]] <- 0                                         # when there are lenghts in the alk that are not in the length frequencies -> keep them but give 0 weight
+        # when there are lengths in the alk that are not in the length frequencies, we keep them but give 0 weight   
+        ret[is.na(ret$n.lf), names(lf.key)[-1]] <- 0 
         
-        #####  4) return it all ####################################################################################
+        # 3.5) Return it all ####
         ret <- cbind(id = x, 
-                     catch[x, cacol[1:5]][rep(1, nrow(ret)),], 
+                     catch[x, cacol[1:5]][rep(1, nrow(ret)), ], 
                      ret,
                      n.lftot = sum(lf.key$n.lf),
                      weight.sample.tot = sum(lf.key$weight.sample),
                      nsample.lengthfreq = n.lf,
                      nsample.agelength = n.al,
-                     option.lengthfreq = o.lf-1,
-                     option.agelength = o.al-1)
+                     option.lengthfreq = o.lf - 1,
+                     option.agelength = o.al - 1)
         
         setTxtProgressBar(pb, x)
         return(ret)
     })
-    ret <- rbindlist(ret,fill=TRUE)          # automatically fills missing ages for certain grouping      
+    ret <- rbindlist(ret, fill = TRUE) # automatically fills missing ages for certain grouping      
     ret <- as.data.frame(ret)
-    cola <- grep('age\\.',names(ret))
-    ret[cola ][is.na(ret[cola])] <- 0        # some ages can be missing for a certain catch -> set to 0
+    cola <- grep('age\\.', names(ret))
+    ret[cola][is.na(ret[cola])] <- 0 # some ages can be missing for a certain catch. They are set to 0
+    ages <- sort(as.numeric(gsub("age\\.", "", names(ret)[cola]))) # sorted age columns
+    
+    # reordering of ret
+    ret <- ret[, c("id", cacol[1:5], "length", "n.lf", "prop", "weight.sample", "weight.unit", "n.agekey", "n.lftot", paste0("age.", ages), 
+                   "weight.sample.tot", "nsample.lengthfreq", "nsample.agelength", "option.lengthfreq", "option.agelength")]
     return(ret)
 }
 
-##' find samples
-##' @param df data.frame in which to find sample
-##' @param o option for searching
-##' @param d date
-##' @param nd neighbouring date
-##' @param g gear
-##' @param r region
-##' @param y year
-##' @param yn neighbouring year
-##' @param p period
-##' @param pn neighbouring period
-##' @details 12 steps to find samples
+##' Find samples
+##' @param df Data.frame in which to find sample.
+##' @param o Option for searching.
+##' @param d Date.
+##' @param nd Neighbouring dates.
+##' @param g Gear.
+##' @param r Region.
+##' @param y Year.
+##' @param yn Neighbouring years.
+##' @param p Period.
+##' @param pn Neighbouring periods.
+##' @details 12 steps to find samples.
 ##' @rdname find.samples
 find.samples <- function(df,o,d,dn,g,r,y,yn,p,pn){
     switch(as.character(o), 
@@ -186,8 +206,6 @@ find.samples <- function(df,o,d,dn,g,r,y,yn,p,pn){
            '9'  = {id <- with(df, year %in% yn & period %in% p  & gear %in% g)},              # neighbouring year, period, gear
            '10' = {id <- with(df, year %in% yn & period %in% pn & gear %in% g)},              # neighbouring year, neigbouring period, gear
            '11' = {id <- with(df, year %in% yn & gear %in% g)},                               # neighbouring year, gear
-           '12' = {id <- with(df, year %in% yn)}                                              # neighbouring year
-    )
+           '12' = {id <- with(df, year %in% yn)})                                             # neighbouring year
     return(id)
 }
-

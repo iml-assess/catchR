@@ -2,7 +2,7 @@
 % Please edit documentation in R/get.samples.R
 \name{get.samples}
 \alias{get.samples}
-\title{get samples: return length frequencies and age-length keys corresponding to the catch from a period, gear and region}
+\title{Return length frequencies and age-length keys corresponding to the catch from a period, gear and region to use in catch-at-age calculations}
 \usage{
 get.samples(
   catch,
@@ -14,27 +14,38 @@ get.samples(
 )
 }
 \arguments{
-\item{catch}{data.frame with columns  year,period,region,gear,catch}
+\item{catch}{Data.frame with these columns: year, period, region, gear, catch.}
 
-\item{lf}{data.frame with columns year,period,region,gear,length,weight.sample,n, sample.id}
+\item{lf}{Data.frame with these columns: year, period, region, gear, length, weight.sample, n, sample.id.}
 
-\item{al}{data.frame with columns year,period,region,gear,length,age,sample.id}
+\item{al}{Data.frame with these columns: year, period, region, gear, length, age, sample.id.}
 
-\item{tresh.al}{threshold of minimum number of samples required for length frequencies}
+\item{tresh.al}{Threshold of minimum number of samples required for length frequencies. By default = 2.}
 
-\item{period.unit}{whether catch and lf are grouped by month or quarter}
+\item{period.unit}{Whether catch and lf are grouped by "month" (default) or "quarter".}
 }
 \description{
-get samples: return length frequencies and age-length keys corresponding to the catch from a period, gear and region
+Return length frequencies and age-length keys corresponding to the catch from a period, gear and region to use in catch-at-age calculations
 }
 \details{
-Attributes length and age data to catch based on the nearest levels (see 12 steps). Used to calculate catch-at-age and length-frequency distributions.
+Attributes length and age data to catch based on the nearest levels (see 12 steps below). Used to calculate catch-at-age and length-frequency distributions.
 
 When catch in a certain year is not attributed to a certain region, gear or period, all samples are taken (e.g., catch with no gear will have samples that could be from any gear)
 Age-length keys can have missing values. Predictions are made based on a multivariate normal distribution, and are presumed to have a precision of 0,001. 
+
 Steps:
- \enumerate{
-   \item to fill
-   \item{...}
+\enumerate{
+ \item year, period, region, gear
+ \item year, neighbouring period, region, gear
+ \item year, period, gear                 
+ \item year, neighbouring period, gear
+ \item year, neighbouring period
+ \item year
+ \item neighbouring year, period, gear, region
+ \item neighbouring year, neigbouring period, gear, region
+ \item neighbouring year, period, gear
+ \item neighbouring year, neigbouring period, gear
+ \item neighbouring year, gear
+ \item neighbouring year
 }
 }
