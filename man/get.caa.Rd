@@ -2,19 +2,19 @@
 % Please edit documentation in R/get.caa.R
 \name{get.caa}
 \alias{get.caa}
-\title{get catch-at-age: return length frequencies and raw age-length keys}
+\title{Get catch-at-age results}
 \usage{
 get.caa(x, plus = NULL)
 }
 \arguments{
-\item{x}{output from get.samples}
+\item{x}{Output from function get.samples().}
 
-\item{plus}{plus group age (numeric)}
+\item{plus}{Whether an age group + is desired (numeric). NULL by default.}
 }
 \description{
-get catch-at-age: return length frequencies and raw age-length keys
+Get catch-at-age results
 }
 \details{
-Once catch of every level is diffused (get.sampled) by length and age class, this function calculates caa.
+This function calculates catch-at-age number (caan), catch-at-age weight (caaw), mean weight-at-age (waa) and mean length-at-age (laa).
  So-called scores were added as an exploratory way to gauge the quality of the estimates each years.
 }

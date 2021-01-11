@@ -2,34 +2,34 @@
 % Please edit documentation in R/get.samples.R
 \name{find.samples}
 \alias{find.samples}
-\title{find samples}
+\title{Find samples}
 \usage{
 find.samples(df, o, d, dn, g, r, y, yn, p, pn)
 }
 \arguments{
-\item{df}{data.frame in which to find sample}
+\item{df}{Data.frame in which to find sample.}
 
-\item{o}{option for searching}
+\item{o}{Option for searching.}
 
-\item{d}{date}
+\item{d}{Date.}
 
-\item{g}{gear}
+\item{g}{Gear.}
 
-\item{r}{region}
+\item{r}{Region.}
 
-\item{y}{year}
+\item{y}{Year.}
 
-\item{yn}{neighbouring year}
+\item{yn}{Neighbouring years.}
 
-\item{p}{period}
+\item{p}{Period.}
 
-\item{pn}{neighbouring period}
+\item{pn}{Neighbouring periods.}
 
-\item{nd}{neighbouring date}
+\item{nd}{Neighbouring dates.}
 }
 \description{
-find samples
+Find samples
 }
 \details{
-12 steps to find samples
+12 steps to find samples.
 }
