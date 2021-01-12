@@ -26,9 +26,9 @@
 #'  \item neighbouring year, gear
 #'  \item neighbouring year
 #' }
-##' @import  data.table lubridate
+##' @import dplyr lubridate
 ##' @importFrom nnet multinom
-##' @importFrom plyr ddply
+##' @importFrom data.table rbindlist
 ##' @rdname get.samples
 ##' @export
 get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit = c('month', 'quarter')){
@@ -46,10 +46,14 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
     period.unit <- match.arg(period.unit)
     
     # 2) Minor calculations and variable creation
-    lf <- ddply(lf, lfcol[1:5], transform, prop = n/sum(n)) # proportion of each length in sample
-    lf$weight.unit <- with(lf, weight.sample/n) # average fish weight
-    
-    lf$date <- with(lf, ymd(paste(year, period, '01')))
+    options(dplyr.summarise.inform = FALSE) # https://www.tidyverse.org/blog/2020/05/dplyr-1-0-0-last-minute-additions/
+    lf <- lf %>% 
+          group_by_at(lfcol[1:5]) %>% 
+          mutate(prop = n/sum(n)) %>% # proportion of each length in each sample
+          as.data.frame() %>%  
+          mutate(weight.unit = weight.sample / n, # average fish weight
+                 date = ymd(paste(year, period, "01")))
+
     al$date <- with(al, ymd(paste(year, period, '01')))
     
     my.levels <- sapply(c('period', 'region', 'gear'), function(x) unique(c(lf[, x], al[, x]))) # unique levels of each group
@@ -88,10 +92,9 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
         o.al <- 1 # first option
         n.al <- 0 # number of samples found
         while(n.al <= tresh.al & o.al <= 12){# keep looking as long as n not big enough and next step possible
-            id <- find.samples(al,o.al,d,dn,g,r,y,yn,p,pn)                               # find samples according to step o
-            this.al <- al[id,]                                                           # select them
-            samples <- unique(apply(this.al[, alcol[c(1:4, 7)]], 1, paste, collapse = " ")) # count unique samples
-            n.al <- length(samples) 
+            id <- find.samples(al,o.al,d,dn,g,r,y,yn,p,pn) # find samples according to step o
+            this.al <- al[id,] # select them
+            n.al <- this.al %>% distinct_at(alcol[c(1:4, 7)]) %>% nrow # count unique samples
             o.al <- o.al + 1                                                             # go to next step
         }
         # 3.2.2) Get age-length key
@@ -99,13 +102,16 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
             warning('Impossible to reach threshold for age-length key.')
             age.key <- data.frame(length = -1, n.agekey = 0)                # use -1 to indicate problems 
         }else{
-            age.key <- with(this.al, table(length, age))                    # age key for this group
-            n.fish  <- rowSums(age.key)                                     # store info on number of fish
-            age.key <- prop.table(age.key, 1)                               # get proportions
-            colnames(age.key) <- paste0('age.', colnames(age.key))          # easier to understand and facilitates use of reshape
-            age.key <- data.frame(length = as.numeric(rownames(age.key)),   # get a df with all the info
-                                  n.agekey = n.fish,
-                                  as.data.frame.matrix(age.key))
+            age.key <- this.al %>% # age key for this group
+                       group_by(length, age) %>% 
+                       count() %>% 
+                       group_by(length) %>% 
+                       mutate(prop = n / sum(n), # prop of aged fish for each length that is age x
+                              n.agekey = sum(n)) %>% # number of fish aged for each length
+                       ungroup() %>% 
+                       pivot_wider(id_cols = c("length", "n.agekey"), names_from = "age", names_prefix = "age.", # put it in a wide format
+                                   values_from = "prop", values_fill = 0) %>% 
+                       as.data.frame()
         }
         
         # 3.3) LF samples ####
@@ -113,24 +119,24 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
         o.lf <- 1 # first option
         n.lf <- 0 # number of samples found
         while(n.lf <= tresh.lf & o.lf <= 12){
-            id <- find.samples(lf,o.lf,d,dn,g,r,y,yn,p,pn)                            # find samples according to step o
-            this.lf <- lf[id, ]                                                       # select them
-            samples <- unique(apply(this.lf[, lfcol[1:5]], 1, paste, collapse = " ")) # count unique samples
-            n.lf <- length(samples)                      
-            o.lf <- o.lf + 1                                                          # go to next step
+            id <- find.samples(lf,o.lf,d,dn,g,r,y,yn,p,pn) # find samples according to step o
+            this.lf <- lf[id, ] # select them
+            n.lf <- this.lf %>% distinct_at(lfcol[1:5]) %>% nrow # count unique samples                      
+            o.lf <- o.lf + 1 # go to next step
         }
         # 3.3.2) Get length frequency distribution
         if(n.lf < tresh.lf){
             warning('Impossible to reach threshold.')
             lf.key <- data.frame(length = -1, n.lf = 0, prop = 0, weight.sample = 0, weight.unit = 0)
         }else{
-             n.l <- aggregate(n~length, data = this.lf, sum) # for selected samples, get MEAN weight and proportion (so each sample has equal weight)
-             prop <- aggregate(prop~length, data = this.lf, mean)
-             weight.sample <- aggregate(weight.sample~length, data = this.lf, sum)
-             weight.unit <- aggregate(weight.unit~length, data = this.lf, mean)
-
-            lf.key <- Reduce(function(...) merge(...), list(n.l, prop, weight.sample, weight.unit))
-            names(lf.key)[2] <- 'n.lf'
+            lf.key <- this.lf %>%
+                      group_by(length) %>% 
+                      summarise(n.lf = sum(n), # number of x cm fish measured for length
+                                prop = mean(prop), # mean proportion for each length found within a unique combination of year-period-region-gear
+                                weight.sample = sum(weight.sample), # weight of all fish of length x measured for length
+                                weight.unit = weight.sample / n.lf) %>%  # mean weight of a fish of length x 
+                      filter(n.lf > 0) %>%  # lines where n.lf = 0 are impossible. If present, remove
+                      as.data.frame()
         }
         
         # 3.4) Bind and fill up the gaps ####
@@ -156,14 +162,14 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
         
         # 3.5) Return it all ####
         ret <- cbind(id = x, 
-                     catch[x, cacol[1:5]][rep(1, nrow(ret)), ], 
+                     catch[x, cacol[1:5]][rep(1, nrow(ret)), ],
                      ret,
-                     n.lftot = sum(lf.key$n.lf),
-                     weight.sample.tot = sum(lf.key$weight.sample),
-                     nsample.lengthfreq = n.lf,
-                     nsample.agelength = n.al,
-                     option.lengthfreq = o.lf - 1,
-                     option.agelength = o.al - 1)
+                     n.lftot = sum(lf.key$n.lf), # total number of fish measured for length in that combination of year-period-region-gear
+                     weight.sample.tot = sum(lf.key$weight.sample), # total weight of fish measured for length in that combination year-period-...
+                     nsample.lengthfreq = n.lf, # Count of samples used to create the LF key
+                     nsample.agelength = n.al, # Count of samples used to create the AL key
+                     option.lengthfreq = o.lf - 1, # Level of data aggregation used to create the LF key (1-12)
+                     option.agelength = o.al - 1) # Level of data aggregation used to create the AL key (1-12)
         
         setTxtProgressBar(pb, x)
         return(ret)
