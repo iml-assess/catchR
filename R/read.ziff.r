@@ -7,17 +7,18 @@
 ##' @importFrom  data.table rbindlist
 ##' @details
 #' This function reads Zonal Interchange File format (ZIFF) data from .csv files "Version_totale", available from: //dcqcimlna01a/BD_Peches/Ziff/Format CSV/Fichiers de données/.
-#'
+#' 
 #' Notes:
 #'  \enumerate{
 #'    \item{NAFO Divisions and Subareas all capitalised to ensure consistency with other databases}
 #'    \item{year, trimester and month values are from catch dates. If no catch date is provided, the landing date is used instead.}
+#'    \item{Data can be read in both languages (column names, province names) but catch-at-age functions require the English version.}
 #' }
 ##' @rdname read.ziff
 ##' @export
-read.ziff <- function(sp, path, year = NULL, language = "fr"){
+read.ziff <- function(sp, path, year = NULL, language = choices = c("fr", "en")){
 
-   language <- match.arg(language, choices = c("fr", "en"))
+   language <- match.arg(language)
 
    # 1) Files to read
    files <- list.files(pattern = "^Version_totale_", full.names = TRUE, ignore.case = TRUE, path = path)
