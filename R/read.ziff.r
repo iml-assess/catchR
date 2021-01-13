@@ -16,7 +16,7 @@
 #' }
 ##' @rdname read.ziff
 ##' @export
-read.ziff <- function(sp, path, year = NULL, language = choices = c("fr", "en")){
+read.ziff <- function(sp, path, year = NULL, language = c("fr", "en")){
 
    language <- match.arg(language)
 
