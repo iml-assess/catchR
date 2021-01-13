@@ -4,42 +4,35 @@
 ##' @details 
 #'  This function calculates catch-at-age number (caan), catch-at-age weight (caaw), mean weight-at-age (waa) and mean length-at-age (laa).
 #'  So-called scores were added as an exploratory way to gauge the quality of the estimates each years.  
-##' @importFrom reshape2 melt
 ##' @rdname get.caa
 ##' @export
 get.caa <- function(x, plus = NULL){
     
     id.age <- grep('age\\.', colnames(x))
     
-     # calculations
-    ret <- melt(x, id = names(x)[-id.age], variable.name = 'age', value.name = 'age.prop')
-    ret$age <- as.numeric(gsub('age.', '', ret$age))
-    ret$wt <- with(ret,catch/weight.unit*age.prop*prop) # caan according to Gavaris
+    # calculations
+    caa <- x %>%
+           pivot_longer(cols = all_of(id.age), names_to = "age", names_prefix = "age.", values_to = "age.prop") %>% # transform to long format
+           mutate(age = as.numeric(age), # make sure age is numeric
+                  wt = catch / weight.unit.mean * age.prop * lf.prop) %>%  # number of fish of that length-age
+           group_by(year,age) %>% 
+           summarise(caan = sum(catch / weight.unit * age.prop * lf.prop), # caan according to Gavaris
+                     caaw = sum(catch * age.prop * lf.prop),
+                     laa = weighted.mean(length, wt),
+                     waa = caaw / caan) %>%  
+           as.data.frame()
     
-    ret <- ret %>%
-        group_by(year,age) %>% 
-        summarise(caanp = sum(catch * age.prop * prop / weight.unit),
-                  caawp = sum(catch * age.prop * prop),
-                  laap = weighted.mean(length*prop,  wt)) %>%  
-        as.data.frame()
-    
-    ret[ret$age>plus,'age'] <- plus
-    ret <- ret %>%
-        group_by(year,age) %>% 
-        summarise(caan = sum(caanp),
-                  caaw = sum(caawp),
-                  waa = caaw/caan,
-                  laa = weighted.mean(laap,  caanp)) %>%  
-        as.data.frame()
-    
-    return(ret)
+    if (!is.null(plus)){ # if a plus group is provided
+        caa[caa$age > plus, 'age'] <- plus 
+        
+        # re-calculations with the plus group
+        caa <- caa %>%
+               group_by(year, age) %>% 
+               summarise(laa = weighted.mean(laa, caan),
+                         caan = sum(caan),
+                         caaw = sum(caaw),
+                         waa = caaw / caan) %>%  
+               as.data.frame()
+    }
+    return(caa)
 }
-
-
-
-
-
-
-
-
-
