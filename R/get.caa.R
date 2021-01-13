@@ -14,22 +14,22 @@ get.caa <- function(x, plus = NULL){
      # calculations
     ret <- melt(x, id = names(x)[-id.age], variable.name = 'age', value.name = 'age.prop')
     ret$age <- as.numeric(gsub('age.', '', ret$age))
-    caa$wt <- with(caa,catch/weight.unit.mean*age.prop*prop) # caan according to Gavaris
+    ret$wt <- with(ret,catch/weight.unit*age.prop*prop) # caan according to Gavaris
     
-    ret <- caa %>%
+    ret <- ret %>%
         group_by(year,age) %>% 
-        summarise(caan = sum(catch * age.prop * prop / weight.unit),
-                  caaw = sum(catch * age.prop * prop),
-                  laa = weighted.mean(length*prop,  wt)) %>%  
+        summarise(caanp = sum(catch * age.prop * prop / weight.unit),
+                  caawp = sum(catch * age.prop * prop),
+                  laap = weighted.mean(length*prop,  wt)) %>%  
         as.data.frame()
     
     ret[ret$age>plus,'age'] <- plus
     ret <- ret %>%
         group_by(year,age) %>% 
-        summarise(caan = sum(caan),
-                  caaw = sum(caaw),
+        summarise(caan = sum(caanp),
+                  caaw = sum(caawp),
                   waa = caaw/caan,
-                  laa = weighted.mean(laa,  caan)) %>%  
+                  laa = weighted.mean(laap,  caanp)) %>%  
         as.data.frame()
     
     return(ret)
