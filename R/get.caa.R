@@ -11,15 +11,6 @@ get.caa <- function(x, plus = NULL){
     
     id.age <- grep('age\\.', colnames(x))
     
-    # plus group
-    if(!is.null(plus)){
-        ages <- as.numeric(gsub('age.', '', names(x)[id.age]))
-        too.old <- ages > plus
-        x[, max(id.age[!too.old])] <- rowSums(x[, id.age[too.old]])
-        x[, id.age[too.old]] <- NULL
-        id.age <- id.age[!too.old]
-    }
-
      # calculations
     ret <- melt(x, id = names(x)[-id.age], variable.name = 'age', value.name = 'age.prop')
     ret$age <- as.numeric(gsub('age.', '', ret$age))
@@ -42,7 +33,7 @@ get.caa <- function(x, plus = NULL){
         as.data.frame()
     
     return(ret)
-    }
+}
 
 
 
