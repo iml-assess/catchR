@@ -19,24 +19,22 @@ get.caa <- function(x, plus = NULL){
         x[, id.age[too.old]] <- NULL
         id.age <- id.age[!too.old]
     }
-    
-    # calculations
+
+     # calculations
     caa <- melt(x, id = names(x)[-id.age], variable.name = 'age', value.name = 'age.prop')
     caa$age <- as.numeric(gsub('age.', '', caa$age))
-    caa$caan <- with(caa,catch * age.prop * n.lf / weight.sample.tot)
-    caa$caaw <- with(caa, catch * age.prop * weight.sample / weight.sample.tot)
+
     caa <- do.call("rbind", as.list(
         by(caa, list(caa[, 'year'], caa[, 'age']), function(y){
-            wt_w = with(y, caaw / sum(caaw))
-            waa = weighted.mean(y$caaw / y$caan, wt_w)
+            wt_w = with(y, catch / weight.unit.mean)  # number of fish landed
+            waa = weighted.mean(y$weight.unit, wt_w)
             waa.var = sum(wt_w * (y$weight.unit - waa)^2)
-            wt_l = with(y, caan / sum(caan))
-            laa = weighted.mean(y$length, wt_l)
-            laa.var = sum(wt_l * (y$length - laa)^2)
+            laa = weighted.mean(y$length*y$prop, wt_w)
+            laa.var = sum(wt_w * (y$length*y$prop - laa)^2)
             data.frame(year = y$year[1],
                        age = y$age[1],
-                       caan = sum(y$caan),
-                       caaw = sum(y$caaw),
+                       caan = sum(with(y, catch * age.prop * prop / waa)),
+                       caaw = sum(with(y, catch * age.prop * prop)),
                        waa = waa,
                        waa.var = waa.var,
                        waa.sd = sqrt(waa.var),
