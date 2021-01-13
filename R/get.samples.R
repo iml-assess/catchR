@@ -26,7 +26,7 @@
 #'  \item neighbouring year, gear
 #'  \item neighbouring year
 #' }
-##' @import dplyr lubridate
+##' @import dplyr lubridate tidyr
 ##' @importFrom nnet multinom
 ##' @importFrom data.table rbindlist
 ##' @rdname get.samples
@@ -36,7 +36,7 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
     # 1) Validation of the arguments
     cacol <- c('year', 'period', 'region', 'gear', 'catch') # required columns in catch
     lfcol <- c('year', 'period', 'region', 'gear', 'sample.id', 'length', 'weight.sample', 'n') # required columns in lf
-    alcol <- c('year', 'period', 'region', 'gear', 'length', 'age', 'sample.id') # required columns in al
+    alcol <- c('year', 'period', 'region', 'gear', 'sample.id', 'length', 'age') # required columns in al
     
     if(!setequal(names(catch), cacol)) stop(paste0('Colnames of catch need to be: ', paste(cacol, collapse = ', ')))
     if(!setequal(names(lf), lfcol))    stop(paste0('Colnames of lf need to be: ',    paste(lfcol, collapse = ', ')))
@@ -94,7 +94,7 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
         while(n.al <= tresh.al & o.al <= 12){# keep looking as long as n not big enough and next step possible
             id <- find.samples(al,o.al,d,dn,g,r,y,yn,p,pn) # find samples according to step o
             this.al <- al[id,] # select them
-            n.al <- this.al %>% distinct_at(alcol[c(1:4, 7)]) %>% nrow # count unique samples
+            n.al <- this.al %>% distinct_at(alcol[c(1:5)]) %>% nrow # count unique samples
             o.al <- o.al + 1                                                             # go to next step
         }
         # 3.2.2) Get age-length key
@@ -104,10 +104,10 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
         }else{
             age.key <- this.al %>% # age key for this group
                        group_by(length, age) %>% 
-                       count() %>% 
+                       count() %>%                   # (gavaris:n'ijk )
                        group_by(length) %>% 
-                       mutate(prop = n / sum(n), # prop of aged fish for each length that is age x
-                              n.agekey = sum(n)) %>% # number of fish aged for each length
+                       mutate(prop = n / sum(n),     # (gavaris:p'ijk )
+                              n.agekey = sum(n)) %>% # (gavaris:n'jk )
                        ungroup() %>% 
                        pivot_wider(id_cols = c("length", "n.agekey"), names_from = "age", names_prefix = "age.", # put it in a wide format
                                    values_from = "prop", values_fill = 0) %>% 
@@ -131,41 +131,45 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
         }else{
             lf.key <- this.lf %>%
                       group_by(length) %>% 
-                      summarise(n.lf = sum(n), # number of x cm fish measured for length
-                                prop = mean(prop), # mean proportion for each length found within a unique combination of year-period-region-gear
-                                weight.sample = sum(weight.sample), # weight of all fish of length x measured for length
-                                weight.unit = weight.sample / n.lf) %>%  # mean weight of a fish of length x 
+                      summarise(n.lf = sum(n), # (gavaris:njk )
+                                prop = sum(prop)/sum(this.lf$prop), # (gavaris:pjk ) ALL SAMPLES HAVE EQUAL WEIGHT (n.lf/sum(n/lf) would give more weight to samples with more fish)
+                                weight.sample = sum(weight.sample), # (gavaris:wjk )
+                                weight.unit=weight.sample/n.lf) %>%  # (gavaris:wbarjk: he doesn't calculate this becauase he always goes for 'aggregated average fish weight ')
                       filter(n.lf > 0) %>%  # lines where n.lf = 0 are impossible. If present, remove
                       as.data.frame()
         }
         
         # 3.4) Bind and fill up the gaps ####
         # 3.4.1) Bind length frequency and age-length keys
-        ret <- merge(lf.key, age.key, all = T)
+        ret <- merge(lf.key, age.key, all.x = T)  # samples for which age but not length directly excluded
         cola <- grep('age\\.', names(ret)) # columns with ages
         
         # 3.4.2) Filling the gaps
         if(any(is.na(ret[, cola]))){ # If for a given length I don't have an age-length key
-            mod <- as.matrix(na.omit(ret[, c(1, cola)])) # matrix with the age-length key
-            alen <- mod[, -1]
+            mod <- as.matrix(na.omit(ret[, c(1, cola)]))   # matrix with the age-length key
+            alen <- mod[, -1, drop=FALSE]
             len  <- mod[, 1]
-            m    <- multinom(alen~len, trace = F, maxit = 1000) # fit model
-            if(m$convergence != 0) warning(paste('Non-convergence when filling gaps for id', x))
-            new <- predict(m, newdata = data.frame(len = ret$length), type = "probs") # predict for all lengths in the freq data
-            new <- round(new, 3) # acceptable precision level (to avoid 0.0000001 % chances of absurd age-length combos)
+            if(ncol(alen)==1){ # if there is only one age class than the likelihood is always 1??
+                new <- rep(1,nrow(ret))
+                warning(paste0('for catch level ',x,' only one age class was found'))
+            }else{            # model if there are multiple age classes
+                m <- multinom(alen~len, trace = F, maxit = 1000)
+                if(m$convergence != 0) warning(paste('Non-convergence when filling gaps for id', x))
+                new <- predict(m, newdata = data.frame(len = ret$length), type = "probs") # predict for all lengths in the freq data
+                new <- round(new, 3) # acceptable precision level (to avoid 0.0000001 % chances of absurd age-length combos)
+            }
             
             ret[, cola][is.na(ret[, cola])] <- new[is.na(ret[, cola])] # replace NA's by predictions
             ret[is.na(ret$n.agekey), 'n.agekey'] <- 0 # there were 0 age key samples
         }
-        # when there are lengths in the alk that are not in the length frequencies, we keep them but give 0 weight   
-        ret[is.na(ret$n.lf), names(lf.key)[-1]] <- 0 
-        
+
         # 3.5) Return it all ####
         ret <- cbind(id = x, 
                      catch[x, cacol[1:5]][rep(1, nrow(ret)), ],
                      ret,
-                     n.lftot = sum(lf.key$n.lf), # total number of fish measured for length in that combination of year-period-region-gear
-                     weight.sample.tot = sum(lf.key$weight.sample), # total weight of fish measured for length in that combination year-period-...
+                     n.lftot = sum(lf.key$n.lf), # (gavaris:nk ) total number of fish measured for length in that combination of year-period-region-gear
+                     weight.sample.tot = sum(lf.key$weight.sample), # (gavaris:wk) total weight of fish measured for length in that combination year-period-...
+                     weight.unit.mean = sum(lf.key$weight.sample)/sum(lf.key$n.lf),  # (gavaris:wbark)
                      nsample.lengthfreq = n.lf, # Count of samples used to create the LF key
                      nsample.agelength = n.al, # Count of samples used to create the AL key
                      option.lengthfreq = o.lf - 1, # Level of data aggregation used to create the LF key (1-12)
@@ -181,8 +185,8 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
     ages <- sort(as.numeric(gsub("age\\.", "", names(ret)[cola]))) # sorted age columns
     
     # reordering of ret
-    ret <- ret[, c("id", cacol[1:5], "length", "n.lf", "prop", "weight.sample", "weight.unit", "n.agekey", "n.lftot", paste0("age.", ages), 
-                   "weight.sample.tot", "nsample.lengthfreq", "nsample.agelength", "option.lengthfreq", "option.agelength")]
+    ret <- ret[, c("id", cacol[1:5], "length", "n.lf", "prop","weight.sample", "weight.sample.tot","weight.unit","weight.unit.mean","n.agekey", "n.lftot", paste0("age.", ages), 
+                    "nsample.lengthfreq", "nsample.agelength", "option.lengthfreq", "option.agelength")]
     return(ret)
 }
 
