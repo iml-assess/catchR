@@ -21,33 +21,28 @@ get.caa <- function(x, plus = NULL){
     }
 
      # calculations
-    caa <- melt(x, id = names(x)[-id.age], variable.name = 'age', value.name = 'age.prop')
-    caa$age <- as.numeric(gsub('age.', '', caa$age))
-
-    caa <- do.call("rbind", as.list(
-        by(caa, list(caa[, 'year'], caa[, 'age']), function(y){
-            wt_w = with(y, catch / weight.unit.mean)  # number of fish landed
-            waa = weighted.mean(y$weight.unit, wt_w)
-            waa.var = sum(wt_w * (y$weight.unit - waa)^2)
-            laa = weighted.mean(y$length*y$prop, wt_w)
-            laa.var = sum(wt_w * (y$length*y$prop - laa)^2)
-            data.frame(year = y$year[1],
-                       age = y$age[1],
-                       caan = sum(with(y, catch * age.prop * prop / waa)),
-                       caaw = sum(with(y, catch * age.prop * prop)),
-                       waa = waa,
-                       waa.var = waa.var,
-                       waa.sd = sqrt(waa.var),
-                       laa = laa,
-                       laa.var = laa.var,
-                       laa.sd = sqrt(laa.var),
-                       score.lf.option = round(weighted.mean(y$option.lengthfreq, y$catch), 2),
-                       score.al.option = round(weighted.mean(y$option.agelength, y$catch), 2),
-                       score.lf.nsample = round(weighted.mean(y$nsample.lengthfreq, y$catch), 2),
-                       score.al.nsample = round(weighted.mean(y$nsample.agelength, y$catch), 2))
-        })))
+    ret <- melt(x, id = names(x)[-id.age], variable.name = 'age', value.name = 'age.prop')
+    ret$age <- as.numeric(gsub('age.', '', ret$age))
+    caa$wt <- with(caa,catch/weight.unit.mean*age.prop*prop) # caan according to Gavaris
     
-    return(caa)}
+    ret <- caa %>%
+        group_by(year,age) %>% 
+        summarise(caan = sum(catch * age.prop * prop / weight.unit),
+                  caaw = sum(catch * age.prop * prop),
+                  laa = weighted.mean(length*prop,  wt)) %>%  
+        as.data.frame()
+    
+    ret[ret$age>plus,'age'] <- plus
+    ret <- ret %>%
+        group_by(year,age) %>% 
+        summarise(caan = sum(caan),
+                  caaw = sum(caaw),
+                  waa = caaw/caan,
+                  laa = weighted.mean(laa,  caan)) %>%  
+        as.data.frame()
+    
+    return(ret)
+    }
 
 
 

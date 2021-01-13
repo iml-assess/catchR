@@ -15,9 +15,9 @@
 #' }
 ##' @rdname read.ziff
 ##' @export
-read.ziff <- function(sp, path, year = NULL, language = "fr"){
+read.ziff <- function(sp, path, year = NULL, language = c("fr", "en")){
 
-   language <- match.arg(language, choices = c("fr", "en"))
+   language <- match.arg(language)
 
    # 1) Files to read
    files <- list.files(pattern = "^Version_totale_", full.names = TRUE, ignore.case = TRUE, path = path)
