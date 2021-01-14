@@ -4,7 +4,7 @@
 \alias{expand.grid.df}
 \title{expand grid for data frames}
 \usage{
-expand.grid.df(...)
+\method{expand}{grid.df}(...)
 }
 \arguments{
 \item{...}{data.frames}

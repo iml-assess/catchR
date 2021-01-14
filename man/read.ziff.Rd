@@ -4,7 +4,7 @@
 \alias{read.ziff}
 \title{read ZIFF files}
 \usage{
-read.ziff(sp, path, year = NULL, language = "fr")
+read.ziff(sp, path, year = NULL, language = c("fr", "en"))
 }
 \arguments{
 \item{sp}{Numeric species code (ex: 100 for Atlantic cod). Can also be a vector of multiple numeric species codes.}
@@ -25,5 +25,6 @@ Notes:
  \enumerate{
    \item{NAFO Divisions and Subareas all capitalised to ensure consistency with other databases}
    \item{year, trimester and month values are from catch dates. If no catch date is provided, the landing date is used instead.}
+   \item{Data can be read in both languages (column names, province names) but catch-at-age functions require the English version.}
 }
 }
