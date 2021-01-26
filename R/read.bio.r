@@ -22,7 +22,13 @@ read.bio <- function(file, year = NULL, species, language = "en", ...) {
     bio <- type.convert(bio)
     attr(x = bio, which = "spec") <- NULL
     
-    if(!is.null(year)) bio <- bio[bio$year %in% year, ]
+    if(!is.null(year)){
+        if (language == "en"){
+            bio <- bio[bio$year %in% year, ]
+        } else {
+            bio <- bio[bio$annee %in% year, ]
+        }
+    }
 
     # add date stuff
     temp <- with(key, c(which(en == 'year'), which(en == 'month'), which(en == 'day')))
