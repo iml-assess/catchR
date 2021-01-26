@@ -3,6 +3,6 @@ id,fr,en,start,end,meta
 2,no_prov,province,2,2,
 3,no_distr,district,3,4,
 4,no_voy,trip,5,7,
-5,long,length,8,10,
+5,longueur,length,8,10,
 6,n_mes,n,11,13,
 7,s_freq,freq,15,22,
