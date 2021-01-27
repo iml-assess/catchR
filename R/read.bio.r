@@ -37,7 +37,7 @@ read.bio <- function(file, year = NULL, species, language = "en", ...) {
     bio$doy  <- as.integer(format(bio$date, "%j"))
 
     # add extra colums
-    if('engin' %in% key$fr) bio <- merge(bio, bio_gear[, c(2:3)], all.x = TRUE, by.x = key[key$fr == 'engin', language], by.y = 'gear.cat') # gears
+    if('engin' %in% key$fr) bio <- merge(bio, bio_gear, all.x = TRUE, by.x = key[key$fr == 'engin', language], by.y = 'gear.cat') # gears
     if('zone' %in% key$fr) bio <- merge(bio, bio_zones, all.x = TRUE) # zones for mackerel
     if('no_prov' %in% key$fr){ # provinces for cod
         bio <- merge(bio, lf_prov[, c("no_prov", language)], all.x = TRUE, by.x = key[key$fr == 'no_prov', language], by.y = 'no_prov') 
