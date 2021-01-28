@@ -2,8 +2,15 @@ Package: catchR
 Title: Analyse catch data and get catch-at-age matrices
 Version: 0.1.0
 Date: 2020-10-21
-Authors@R: c(person("blub","blub",role=c("aut","cre"),email="blub@dfo-mpo.gc.ca"))
-Description: blub
+Authors@R: c(person("Elisabeth",
+                    "Van Beveren",
+                    role=c("aut","cre"),
+                    email="Elisabeth.vanbeveren@dfo-mpo.gc.ca"),
+             person("Jordan",
+                    "Ouelette-Plante",
+                    role=c("aut"),
+                    email="Jordan.ouelette-plante@dfo-mpo.gc.ca"))
+Description: Reads data for stock assessment, includes functions to get catch- weight and length-at-age. 
 License: GPL-2
 Imports: readr, lubridate
 Encoding: UTF-8
