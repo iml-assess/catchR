@@ -9,7 +9,7 @@ outlier(x, coef = 1.5, na.rm = TRUE, ...)
 \arguments{
 \item{x}{vector}
 
-\item{coef}{}
+\item{coef}{multiplication factor}
 }
 \description{
 Identify outliers based on the interquantile range

@@ -7,9 +7,9 @@ Authors@R: c(person("Elisabeth",
                     role=c("aut","cre"),
                     email="Elisabeth.vanbeveren@dfo-mpo.gc.ca"),
              person("Jordan",
-                    "Ouelette-Plante",
+                    "Ouellette-Plante",
                     role=c("aut"),
-                    email="Jordan.ouelette-plante@dfo-mpo.gc.ca"))
+                    email="Jordan.ouellette-plante@dfo-mpo.gc.ca"))
 Description: Reads data for stock assessment, includes functions to get catch- weight and length-at-age. 
 License: GPL-2
 Imports: readr, lubridate, data.table, tidyr
