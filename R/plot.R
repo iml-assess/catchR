@@ -3,6 +3,7 @@
 ##' @param x name of columns with x values
 ##' @param y name of columns with y values
 ##' @param fill name of columns with fill values
+##' @import ggplot2
 ##' @rdname plotCatch
 ##' @export
 plotCatch <- function(data,x,y,fill=NULL){

@@ -12,7 +12,7 @@ Authors@R: c(person("Elisabeth",
                     email="Jordan.ouelette-plante@dfo-mpo.gc.ca"))
 Description: Reads data for stock assessment, includes functions to get catch- weight and length-at-age. 
 License: GPL-2
-Imports: readr, lubridate
+Imports: readr, lubridate, data.table, tidyr
 Encoding: UTF-8
 LazyData: TRUE
 RoxygenNote: 7.1.1
