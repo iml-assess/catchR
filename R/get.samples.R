@@ -1,14 +1,15 @@
 ##' Return length frequencies and age-length keys corresponding to the catch from a period, gear and region to use in catch-at-age calculations
 ##' @param catch Data.frame with these columns: year, period, region, gear, catch.
-##' @param lf Data.frame with these columns: year, period, region, gear, length, weight.sample, n, sample.id.
+##' @param lf Data.frame with these columns: year, period, region, gear, length, weight.unit, n, sample.id.
 ##' @param al Data.frame with these columns: year, period, region, gear, length, age, sample.id.
 ##' @param tresh.al Threshold of minimum number of samples required for age-length keys. By default = 2.
 ##' @param tresh.al Threshold of minimum number of samples required for length frequencies. By default = 2.
 ##' @param period.unit Whether catch and lf are grouped by "month" (default) or "quarter".
 ##' @details 
-#' Attributes length and age data to catch based on the nearest levels (see 12 steps below). Used to calculate catch-at-age and length-frequency distributions.
+#' Attributes length-frequencies and age-length keys to a catch level based on a 12 step approach (see steps below). Used to calculate catch-at-age, weight-at-age and length-frequency distributions.
 #' 
-#' When catch in a certain year is not attributed to a certain region, gear or period, all samples are taken (e.g., catch with no gear will have samples that could be from any gear)
+#' Regions of the catch (e.g., 3P) can be broader then the sample regions (e.g., 3Pn). Sample regions containing the catch region (such as the 3Pn example) will all be used.
+#' When catch in a certain year is not attributed to a certain region, gear or period, that factor is ignored (e.g., catch with no gear will have samples that could be from any gear)
 #' Age-length keys can have missing values. Predictions are made based on a multivariate normal distribution, and are presumed to have a precision of 0,001. 
 #' 
 #' Steps:
@@ -35,7 +36,7 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
     
     # 1) Validation of the arguments
     cacol <- c('year', 'period', 'region', 'gear', 'catch') # required columns in catch
-    lfcol <- c('year', 'period', 'region', 'gear', 'sample.id', 'length', 'weight.sample', 'n') # required columns in lf
+    lfcol <- c('year', 'period', 'region', 'gear', 'sample.id', 'length', 'weight.unit', 'n') # required columns in lf
     alcol <- c('year', 'period', 'region', 'gear', 'sample.id', 'length', 'age') # required columns in al
     
     if(!setequal(names(catch), cacol)) stop(paste0('Colnames of catch need to be: ', paste(cacol, collapse = ', ')))
@@ -50,14 +51,12 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
     lf <- lf %>% 
           group_by_at(lfcol[1:5]) %>% 
           mutate(prop = n/sum(n)) %>% # proportion of each length in each sample
-          as.data.frame() %>%  
-          mutate(weight.unit = weight.sample / n, # average fish weight
-                 date = ymd(paste(year, period, "01")))
-
+          as.data.frame()
+    
+    lf$date <- with(lf, ymd(paste(year, period, '01')))
     al$date <- with(al, ymd(paste(year, period, '01')))
     
     my.levels <- sapply(c('period', 'region', 'gear'), function(x) sort(unique(c(lf[, x], al[, x])))) # unique levels of each group
-    my.levels$region <- my.levels$region[which(nchar(my.levels$region) != 2)] # to remove levels like 4R or 4S
     
     # 3) For each line of catch, i.e. for each combination of year-period-region-gear, get lf and al data to use in caa calculations
     pb <- txtProgressBar(min = 0, max = nrow(catch), style = 3) # set the progress bar
@@ -72,9 +71,8 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
         # If p/r/g is NA, the function should not automatically skip options 
         # (e.g. if only missing gear in catch data, option 1 should still be used and not 5)
         if(is.na(p)) p <- my.levels$period
-        if(is.na(r)) r <- my.levels$region
-        if(!(r %in% my.levels$region)) r <- my.levels$region[grepl(r, as.character(my.levels$region), fixed = T)] # if vague NAFO subarea, will work will all levels of NAFO area
         if(is.na(g)) g <- my.levels$gear
+        if(is.na(r)) r <- my.levels$region else r <- my.levels$region[grepl(r, as.character(my.levels$region), fixed = T)]  # samples from region and subregions
         
         # 3.1) Neighbouring dates/months/years 
         d  <- ymd(paste(y, p, '01')) # date (for semesters this will be month 1 to 4, but that doesn't matter)
@@ -92,7 +90,7 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
         # 3.2.1) Get samples to be used
         o.al <- 1 # first option
         n.al <- 0 # number of samples found
-        while(n.al <= tresh.al & o.al <= 12){# keep looking as long as n not big enough and next step possible
+        while(n.al < tresh.al & o.al <= 12){# keep looking as long as n not big enough and next step possible
             id <- find.samples(al,o.al,d,dn,g,r,y,yn,p,pn) # find samples according to step o
             this.al <- al[id,] # select them
             n.al <- this.al %>% distinct_at(alcol[c(1:5)]) %>% nrow # count unique samples
@@ -100,7 +98,7 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
         }
         # 3.2.2) Get age-length key
         if(n.al < tresh.al){
-            warning('Impossible to reach threshold for age-length key.')
+            warning(paste0('** for catch level ', x, ' the age-length key threshold was not reached**'))
             age.key <- data.frame(length = -1, n.agekey = 0)                # use -1 to indicate problems 
         }else{
             age.key <- this.al %>% # age key for this group
@@ -119,7 +117,7 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
         # 3.3.1) Get samples to be used
         o.lf <- 1 # first option
         n.lf <- 0 # number of samples found
-        while(n.lf <= tresh.lf & o.lf <= 12){
+        while(n.lf < tresh.lf & o.lf <= 12){
             id <- find.samples(lf,o.lf,d,dn,g,r,y,yn,p,pn) # find samples according to step o
             this.lf <- lf[id, ] # select them
             n.lf <- this.lf %>% distinct_at(lfcol[1:5]) %>% nrow # count unique samples                      
@@ -127,35 +125,35 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
         }
         # 3.3.2) Get length frequency distribution
         if(n.lf < tresh.lf){
-            warning('Impossible to reach threshold.')
+            warning(paste0('** for catch level ', x, ' the length-frequency threshold was not reached**'))
             lf.key <- data.frame(length = -1, n.lf = 0, lf.prop = 0, weight.sample = 0, weight.unit = 0)
         }else{
             lf.key <- this.lf %>%
                       group_by(length) %>% 
                       summarise(n.lf = sum(n), # (gavaris:njk)
                                 lf.prop = sum(prop) / sum(this.lf$prop), # (gavaris:pjk ) ALL SAMPLES HAVE EQUAL WEIGHT (n.lf/sum(n/lf) would give more weight to samples with more fish)
-                                weight.sample = sum(weight.sample), # (gavaris:wjk )
-                                weight.unit = weight.sample / n.lf) %>%  # (gavaris:wbarjk: he doesn't calculate this becauase he always goes for 'aggregated average fish weight ')
+                                weight.sample = sum(weight.unit*n), # (gavaris:wjk )
+                                weight.unit = mean(weight.unit)) %>%  # (gavaris:wbarjk: he doesn't calculate this becauase he always goes for 'aggregated average fish weight ')
                       filter(n.lf > 0) %>%  # lines where n.lf = 0 are impossible. If present, remove
                       as.data.frame()
         }
         
         # 3.4) Bind and fill up the gaps ####
         # 3.4.1) Bind length frequency and age-length keys
-        ret <- merge(lf.key, age.key, all.x = T)  # samples for which age but not length directly excluded
+        ret <- merge(lf.key, age.key, all.x = T)  # samples for which age but not length are directly excluded
         cola <- grep('age\\.', names(ret)) # columns with ages
         
         # 3.4.2) Filling the gaps
-        if(any(is.na(ret[, cola]))){ # If for a given length I don't have an age-length key
+        if(any(is.na(ret[, cola])) & n.lf >= tresh.lf & n.al >= tresh.al){ # If for a given length I don't have an age-length key but I should have
             mod <- as.matrix(na.omit(ret[, c(1, cola)]))   # matrix with the age-length key
             alen <- mod[, -1, drop = FALSE]
             len  <- mod[, 1]
             if(ncol(alen) == 1){ # if there is only one age class than the likelihood is always 1??
                 new <- rep(1,nrow(ret))
-                warning(paste0('for catch level ', x, ' only one age class was found'))
+                warning(paste0('** for catch level ', x, ' only one age class was found **'))
             }else{ # model if there are multiple age classes
                 m <- multinom(alen~len, trace = F, maxit = 1500)
-                if(m$convergence != 0) warning(paste('Non-convergence when filling gaps for id', x))
+                if(m$convergence != 0) warning(paste('** Non-convergence when filling gaps for id', x))
                 new <- predict(m, newdata = data.frame(len = ret$length), type = "probs") # predict for all lengths in the freq data
                 new <- round(new, 3) # acceptable precision level (to avoid 0.0000001 % chances of absurd age-length combos)
             }
@@ -170,7 +168,7 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
                      ret,
                      n.lftot = sum(lf.key$n.lf), # (gavaris:nk) total number of fish measured for length in that combination of year-period-region-gear
                      weight.sample.tot = sum(lf.key$weight.sample), # (gavaris:wk) total weight of fish measured for length in that combination year-period-...
-                     weight.unit.mean = sum(lf.key$weight.sample) / sum(lf.key$n.lf),  # (gavaris:wbark)
+                     #weight.unit.mean = sum(lf.key$weight.sample) / sum(lf.key$n.lf),  # (gavaris:wbark)
                      nsample.lengthfreq = n.lf, # Count of samples used to create the LF key
                      nsample.agelength = n.al, # Count of samples used to create the AL key
                      option.lengthfreq = o.lf - 1, # Level of data aggregation used to create the LF key (1-12)
@@ -186,7 +184,7 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
     ages <- sort(as.numeric(gsub("age\\.", "", names(ret)[cola]))) # sorted age columns
     
     # reordering of ret
-    ret <- ret[, c("id", cacol[1:5], "length", "n.lf", "lf.prop", "weight.sample", "weight.sample.tot", "weight.unit", "weight.unit.mean",
+    ret <- ret[, c("id", cacol[1:5], "length", "n.lf", "lf.prop", "weight.sample", "weight.sample.tot", "weight.unit",
                    "n.agekey", "n.lftot", paste0("age.", ages), "nsample.lengthfreq", "nsample.agelength", "option.lengthfreq", "option.agelength")]
     return(ret)
 }

@@ -4,12 +4,12 @@
 \alias{get.caa}
 \title{Get catch-at-age results}
 \usage{
-get.caa(x, plus = NULL)
+get.caa(x, plus = Inf)
 }
 \arguments{
 \item{x}{Output from function get.samples().}
 
-\item{plus}{Whether an age group + is desired (numeric). NULL by default.}
+\item{plus}{Value of plus group (numeric).}
 }
 \description{
 Get catch-at-age results

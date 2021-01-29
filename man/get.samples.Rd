@@ -16,7 +16,7 @@ get.samples(
 \arguments{
 \item{catch}{Data.frame with these columns: year, period, region, gear, catch.}
 
-\item{lf}{Data.frame with these columns: year, period, region, gear, length, weight.sample, n, sample.id.}
+\item{lf}{Data.frame with these columns: year, period, region, gear, length, weight.unit, n, sample.id.}
 
 \item{al}{Data.frame with these columns: year, period, region, gear, length, age, sample.id.}
 
@@ -28,9 +28,10 @@ get.samples(
 Return length frequencies and age-length keys corresponding to the catch from a period, gear and region to use in catch-at-age calculations
 }
 \details{
-Attributes length and age data to catch based on the nearest levels (see 12 steps below). Used to calculate catch-at-age and length-frequency distributions.
+Attributes length-frequencies and age-length keys to a catch level based on a 12 step approach (see steps below). Used to calculate catch-at-age, weight-at-age and length-frequency distributions.
 
-When catch in a certain year is not attributed to a certain region, gear or period, all samples are taken (e.g., catch with no gear will have samples that could be from any gear)
+Regions of the catch (e.g., 3P) can be broader then the sample regions (e.g., 3Pn). Sample regions containing the catch region (such as the 3Pn example) will all be used.
+When catch in a certain year is not attributed to a certain region, gear or period, that factor is ignored (e.g., catch with no gear will have samples that could be from any gear)
 Age-length keys can have missing values. Predictions are made based on a multivariate normal distribution, and are presumed to have a precision of 0,001. 
 
 Steps:
