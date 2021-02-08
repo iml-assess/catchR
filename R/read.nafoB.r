@@ -53,7 +53,7 @@ read.nafoB <- function(path, year = NULL, species = NULL, overwrite = FALSE){
         }
         
         fi <- list.files(un, full.names = T, recursive = T)
-        ma <- grep('NAFO', fi, value = T)
+        ma <- grep('nafo-21b-[0-9]+-[0-9]+/NAFO', fi, value = T)
         main <-fread(ma, data.table = F, stringsAsFactors = F)
         names(main) <- tolower(names(main))
         names(main)[which(names(main) == 'catches')] <- 'month_nk' # some years it is catches. other files use month_nk
