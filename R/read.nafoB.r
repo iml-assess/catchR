@@ -60,6 +60,7 @@ read.nafoB <- function(path, year = NULL, species = NULL, overwrite = FALSE){
         names(main)[which(names(main) %in% c('gearcode', 'gear'))] <- 'gear.code' # difference between files
         names(main)[which(names(main) %in% c('areacode', 'divcode'))] <- 'div.code' # difference between files
         names(main)[which(names(main) == 'country')] <- 'country.code' # because that's what it is
+        names(main)[which(names(main) %in% c('specieseffort'))] <- 'code' # difference between files
         
         # load meta data for each file, just to be sure that there are no changes from zip file to zip file in terms of codes
         # country code
@@ -119,7 +120,7 @@ read.nafoB <- function(path, year = NULL, species = NULL, overwrite = FALSE){
         }
         names(species) <- c('code', 'species.name', 'species.common', 'species.lat', 'species.abbr', 'species.class')
         
-        # add zip specific meta data 
+        # add NAFOB specific meta data 
         Reduce(function(...) mergeif(...), list(main, gear, mainsp, divisions, species))
     })
     nafo <- lapply(nafo, type.convert, as.is = TRUE) # equal attributes for binding
