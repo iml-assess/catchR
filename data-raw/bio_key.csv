@@ -21,7 +21,7 @@ id,fr,en,start,end,species
 2,no_prov,province,2,2,cod
 3,no_dist,district,3,4,cod
 4,no_voy,trip,5,7,cod
-5,zone_peche,fishing.zone,8,11,cod
+5,opano,nafo.sub,8,11,cod
 6,jour,day,12,13,cod
 7,mois,month,14,15,cod
 8,annee,year,16,19,cod
@@ -33,5 +33,5 @@ id,fr,en,start,end,species
 14,longueur,length,40,42,cod
 15,sexe,sex,45,45,cod
 16,age,age,46,47,cod
-17,s_ech,sample.id,48,53,cod
+17,ech_id,sample.id,48,53,cod
 18,nbpc,nbpc,55,60,cod

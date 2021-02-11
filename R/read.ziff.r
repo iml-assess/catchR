@@ -4,7 +4,7 @@
 ##' @param year Vector of years to read (ex: 2015:2020). NULL by default, meaning the function will keep data from all available years.
 ##' @param language Language to use for column names, either "fr" (default) or "en".
 ##' @import readr lubridate
-##' @importFrom  data.table rbindlist
+##' @importFrom  data.table rbindlist fread
 ##' @details
 #' This function reads Zonal Interchange File format (ZIFF) data from .csv files "Version_totale", available from: //dcqcimlna01a/BD_Peches/Ziff/Format CSV/Fichiers de données/.
 #' 
@@ -36,11 +36,11 @@ read.ziff <- function(sp, path, year = NULL, language = c("fr", "en")){
    # 2) Files reading
    ziff <- lapply(1:length(files), function(x){
             print(files[x])
-            z <- read.csv(files[x])
+            z <- fread(file = files[x], sep = ",")
             z <- z[z$cod_esp %in% sp, ] # keep only the lines of each file for the species of interest.
             return(z)
             })
-   ziff <- rbindlist(ziff, fill = TRUE) # faster than rbind.fill or do.call
+   ziff <- rbindlist(ziff, fill = TRUE)
    ziff <- as.data.frame(ziff)
 
    # 3) data clean up
