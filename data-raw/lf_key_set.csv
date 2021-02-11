@@ -2,27 +2,27 @@ id,fr,en,start,end,meta
 1,cart_type,type,1,1,Type d'information pour la ligne
 2,esp_ech,species,2,5,Code identifiant l'espèce échantillonnée
 3,no_voy,trip,6,8,Numéro du voyage 
-4,no_prov,province,9,9,"Identifiant de la province pour le débarquement 1=NE, 2=NB, 3=IPE, 4=Qc, 5=TN, 6=St-Pierre et Miquelon "
+4,no_prov,province,9,9,Identifiant de la province pour le débarquement 1=NE; 2=NB; 3=IPE; 4=Qc; 5=TN; 6=St-Pierre et Miquelon 
 5,no_distr,district,10,11,Identifiant du district du débarquement 
 6,jour,day,12,13,Jour de la date du débarquement 
 7,mois,month,14,15,Mois de la date du débarquement
 8,annee,year,16,19,Année de la date du débarquement 
 9,div,nafo.sub,20,23,Identifiant de la zone de pêche selon OPANO 
-10,lat,lat,24,29,"Latitude de la position de pêche, unités=ddmm.%%mm"
-11,long,lon,30,35,"Longitude de la position de pêche, unités=ddmm.%%mm*/"
-12,t_exp,activity,36,37,"Identifiant de l'activité d'échant. 92=recherche (rech.) capelan, 93= rech. maquereau, 94= génétique maquereau, 95=Pêcheur-Repères, 96=Relevé acoustique, 97=Observ., 98=Échant. mer, 99=Échant. quai "
+10,lat,lat,24,29,Latitude de la position de pêche; unités=ddmm.%%mm
+11,long,lon,30,35,Longitude de la position de pêche; unités=ddmm.%%mm*/
+12,t_exp,activity,36,37,Identifiant de l'activité d'échant. 92=recherche (rech.) capelan; 93= rech. maquereau; 94= génétique maquereau; 95=Pêcheur-Repères; 96=Relevé acoustique; 97=Observ.; 98=Échant. mer; 99=Échant. quai 
 13,nbpc,nbpc,38,43,Identifiant du bateau de pêche 
 14,engin,gear.cat,44,47,Identifiant de l'engin de pêche utilisé 
-15,maille,mesh,48,51,"Maillage de l'engin de pêche, unité=m"
-16,prof,depth,52,54,"Profondeur de l'activité de pêche, unité=m"
-17,etat_deb,state.id,55,56,"Identifiant de l'état du poisson lors de l'échantillonnage 1=rond, 2=Éviscéré, 3=Éviscéré et étêté, 4=sans queue, 5=saigné, 6=fendu, 9=autres "
-18,pds_deb,weight.land,57,62,"Poids au débarquement, unité=kg "
-19,pds_ech,weight.sample,63,68,"Poids de l'échantillon, unité=kg "
-20,ech_cat,sample.cat,69,69,"Identifiant de la catégorie d'échantillonnage 0=pas de tri, 1=très petit, 2=petit, 3=moyen, 4=grand, 5=très grand, 9=autres "
+15,maille,mesh,48,51,Maillage de l'engin de pêche; unité=m
+16,prof,depth,52,54,Profondeur de l'activité de pêche; unité=m
+17,etat_deb,state.id,55,56,Identifiant de l'état du poisson lors de l'échantillonnage 1=rond; 2=Éviscéré; 3=Éviscéré et étêté; 4=sans queue; 5=saigné; 6=fendu; 9=autres 
+18,pds_deb,weight.land,57,62,Poids au débarquement; unité=kg 
+19,pds_ech,weight.sample,63,68,Poids de l'échantillon; unité=kg 
+20,ech_cat,sample.cat,69,69,Identifiant de la catégorie d'échantillonnage 0=pas de tri; 1=très petit; 2=petit; 3=moyen; 4=grand; 5=très grand; 9=autres 
 21,n_cat,sample.ncat,70,71,Nombre de catégories dans l'échantillon. Lorsque Cat_Ech=0 nous aurons N_Cat=1
-22,code_par,id.par,72,77,"Attribut identifiant le type d'échantillon, la région d'échantillonnage et l'échantillonneur "
+22,code_par,id.par,72,77,Attribut identifiant le type d'échantillon; la région d'échantillonnage et l'échantillonneur 
 23,sexe,sex,78,78,Identification du sexe de l'organisme 
-24,type_msure,length.bin,79,79,"Groupe de mesure utilisé pour mesurer les poissons constituant la fréquence de taille 1=1cm,2=0.5cm, 3=1mm, 4=0.5mm "
-25,grp_mes,length.type,80,80,"Type de longueur utilisé pour mesurer les poissons 1=Long. totale, 2=Long. fourche, 3=Long. standard, 4=Long. étêté "
+24,type_msure,length.bin,79,79,Groupe de mesure utilisé pour mesurer les poissons constituant la fréquence de taille 1=1cm;2=0.5cm; 3=1mm; 4=0.5mm 
+25,grp_mes,length.type,80,80,Type de longueur utilisé pour mesurer les poissons 1=Long. totale; 2=Long. fourche; 3=Long. standard; 4=Long. étêté 
 26,nb_engin,gear.number,81,83,Nombre d'engins de pêche relevés 
 27,s_ech,sample.id,84,89,Numéro séquentiel unique d'échantillon 
