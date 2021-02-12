@@ -7,7 +7,7 @@ id,fr,en,start,end,meta
 6,jour,day,12,13,Jour de la date du débarquement 
 7,mois,month,14,15,Mois de la date du débarquement
 8,annee,year,16,19,Année de la date du débarquement 
-9,div,nafo.sub,20,23,Identifiant de la zone de pêche selon OPANO 
+9,opano,nafo.sub,20,23,Identifiant de la zone de pêche selon OPANO 
 10,lat,lat,24,29,Latitude de la position de pêche; unités=ddmm.%%mm
 11,long,lon,30,35,Longitude de la position de pêche; unités=ddmm.%%mm*/
 12,t_exp,activity,36,37,Identifiant de l'activité d'échant. 92=recherche (rech.) capelan; 93= rech. maquereau; 94= génétique maquereau; 95=Pêcheur-Repères; 96=Relevé acoustique; 97=Observ.; 98=Échant. mer; 99=Échant. quai 
@@ -22,7 +22,7 @@ id,fr,en,start,end,meta
 21,n_cat,sample.ncat,70,71,Nombre de catégories dans l'échantillon. Lorsque Cat_Ech=0 nous aurons N_Cat=1
 22,code_par,id.par,72,77,Attribut identifiant le type d'échantillon; la région d'échantillonnage et l'échantillonneur 
 23,sexe,sex,78,78,Identification du sexe de l'organisme 
-24,type_msure,length.bin,79,79,Groupe de mesure utilisé pour mesurer les poissons constituant la fréquence de taille 1=1cm;2=0.5cm; 3=1mm; 4=0.5mm 
-25,grp_mes,length.type,80,80,Type de longueur utilisé pour mesurer les poissons 1=Long. totale; 2=Long. fourche; 3=Long. standard; 4=Long. étêté 
+24,grp_mes,length.bin,79,79,Groupe de mesure utilisé pour mesurer les poissons constituant la fréquence de taille 1=1cm;2=0.5cm; 3=1mm; 4=0.5mm 
+25,type_mesure,length.type,80,80,Type de longueur utilisé pour mesurer les poissons 1=Long. totale; 2=Long. fourche; 3=Long. standard; 4=Long. étêté 
 26,nb_engin,gear.number,81,83,Nombre d'engins de pêche relevés 
-27,s_ech,sample.id,84,89,Numéro séquentiel unique d'échantillon 
+27,ech_id,sample.id,84,89,Numéro séquentiel unique d'échantillon 

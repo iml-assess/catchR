@@ -13,8 +13,8 @@ date_deb,land.date,Date de débarquement,AAAA-MM-JJ,"AAAAMM00 ou AAAAMM99 convert
 AAAA0229 converti en AAAA0228 si non bissextile
 AAAA0631 converti en AAAA0630
 AAAA0931 converti en AAAA0930"
-div,nafo.sub,Zone unitaire de l'OPANO,$3.00 ,
-opano,nafo,Division de l'OPANO,$3.00 ,
+opano,nafo.sub,Zone unitaire de l'OPANO,$3.00 ,
+div,nafo,Division de l'OPANO,$3.00 ,
 engin,gear,Engin de pêche,best12.,Descriptions dans fichier Codes_engin.doc (\\dcqcimlna01a\bd_peches\Ziff\Documentation)
 cl_engin,gear.class.id,Classe d'engin,best12.,1=Fixe; 2=Mobile
 port_deb,port.land,Port de débarquement,best12.,Descriptions dans fichier District.xls (\\dcqcimlna01a\bd_peches\Ziff\Documentation)

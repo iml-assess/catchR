@@ -41,7 +41,7 @@ read.lf <- function(file, year = NULL, language = "en", ...){
     lf[, 24] <- lf_bins[match(lf[, 24],lf_bins[, 1]), language]              # replace keys by what they stand for (length bins)   
     lf[, 25] <- lf_lengthtype[match(lf[, 25], lf_lengthtype[, 1]), language] # replace keys by what they stand for (length types)   
     
-    lf <- merge(lf, bio_zones[, c(2,3)], all.x = TRUE, by.x = lf_key_set[lf_key_set$fr == 'div', language], by.y = 'nafo.sub')
+    lf <- merge(lf, bio_zones[, c(2,3)], all.x = TRUE, by.x = lf_key_set[lf_key_set$fr == 'opano', language], by.y = 'nafo.sub')
     lf$nafo <- toupper(lf$nafo)
     
     
