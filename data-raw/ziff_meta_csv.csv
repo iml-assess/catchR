@@ -1,5 +1,5 @@
 fr,en,Description,Format,Notes
-nbpc,npbc,Code NBPC,$6.00 ,"000000, B00000 ou > 190000 correspond à des récépissés supplémentaires d'achat"
+nbpc,npbc,Code NBPC,$6.00 ,000000/B00000 ou > 190000 correspond à des récépissés supplémentaires d'achat
 tonnage,tonnage,Tonnage du bateau,best12.,En tonnes
 cl_ton,tonnage.class.id,Classe de tonnage,best12.,"Voir onglet ""Cl_ton"""
 lht,length,Longueur hors-tout du bateau (LHT),best12.,En pieds

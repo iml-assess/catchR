@@ -97,20 +97,23 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
             o.al <- o.al + 1                                                             # go to next step
         }
         # 3.2.2) Get age-length key
-        if(n.al < tresh.al){
-            warning(paste0('** for catch level ', x, ' the age-length key threshold was not reached**'))
+        if(n.al==0){
+            warning(paste0('** for catch level ', x, ' no age-length key exists**'))
             age.key <- data.frame(length = -1, n.agekey = 0)                # use -1 to indicate problems 
         }else{
+            if(n.al < tresh.al){
+                warning(paste0('** for catch level ', x, ' the age-length key threshold was not reached**'))
+            }
             age.key <- this.al %>% # age key for this group
-                       group_by(length, age) %>% 
-                       count() %>%                   # (gavaris:n'ijk )
-                       group_by(length) %>% 
-                       mutate(prop = n / sum(n),     # (gavaris:p'ijk )
-                              n.agekey = sum(n)) %>% # (gavaris:n'jk )
-                       ungroup() %>% 
-                       pivot_wider(id_cols = c("length", "n.agekey"), names_from = "age", names_prefix = "age.", # put it in a wide format
-                                   values_from = "prop", values_fill = 0) %>% 
-                       as.data.frame()
+                group_by(length, age) %>% 
+                count() %>%                   # (gavaris:n'ijk )
+                group_by(length) %>% 
+                mutate(prop = n / sum(n),     # (gavaris:p'ijk )
+                       n.agekey = sum(n)) %>% # (gavaris:n'jk )
+                ungroup() %>% 
+                pivot_wider(id_cols = c("length", "n.agekey"), names_from = "age", names_prefix = "age.", # put it in a wide format
+                                values_from = "prop", values_fill = 0) %>% 
+                as.data.frame()
         }
         
         # 3.3) LF samples ####
@@ -124,10 +127,13 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
             o.lf <- o.lf + 1 # go to next step
         }
         # 3.3.2) Get length frequency distribution
-        if(n.lf < tresh.lf){
-            warning(paste0('** for catch level ', x, ' the length-frequency threshold was not reached**'))
+        if(n.lf==0){
+            warning(paste0('** for catch level ', x, ' no length-frequency exists**'))
             lf.key <- data.frame(length = -1, n.lf = 0, lf.prop = 0, weight.sample = 0, weight.unit = 0)
         }else{
+            if(n.lf < tresh.lf){
+                warning(paste0('** for catch level ', x, ' the length-frequency threshold was not reached**'))
+            }
             lf.key <- this.lf %>%
                       group_by(length) %>% 
                       summarise(n.lf = sum(n), # (gavaris:njk)

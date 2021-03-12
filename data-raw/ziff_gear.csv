@@ -82,7 +82,7 @@ engin,gear.fr,gear.en,gear.fixmob,gear.cat
 85,Harpon électrique,Electric harpoon,M,HAR
 86,Baril de Myxine du nord,Hagfish Barrel,F,MIS
 87,Casier conique (4 pieds),,F,FIX
-88,"Casier à buccin (0,15 mètre cube et moins)",Trap net less than 0.15 m3,F,FIX
+88,Casier à buccin (0.15 mètre cube et moins),Trap net less than 0.15 m3,F,FIX
 89,"Casier à buccin (0,16 à 0,30 mètre cube)",Trap net 0.16 m3 to 0.30 m3,F,FIX
 90,Divers,Miscellaneous,F,MIS
 91,Râteaux et pinces,Rakes and tongs,F,MIS
