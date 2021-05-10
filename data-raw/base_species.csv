@@ -22,7 +22,7 @@ ziff,144,Greenland halibut
 ziff,145,Windowpane flounder
 ziff,149,Unspecified flounders
 ziff,160,Skate
-ziff,162,"Dogfish, black"
+ziff,162,Dogfish (black)
 ziff,168,Sea raven
 ziff,170,Pollock
 ziff,171,White hake
@@ -36,10 +36,10 @@ ziff,178,Sand eel
 ziff,179,Roundnose grenadier
 ziff,180,Red hake
 ziff,181,Sculpins
-ziff,182,"Grenadier, rough-head"
+ziff,182,Grenadier (rough-head)
 ziff,183,Ocean pout
 ziff,185,Wrymouth
-ziff,188,"Hake, blue"
+ziff,188,Hake (blue)
 ziff,191,Northern wolffish
 ziff,192,Atlantic wolffish
 ziff,193,Spotted wolffish
@@ -52,11 +52,11 @@ ziff,248,Mackerel bait (fishing licence only)
 ziff,249,Mackerel commercial (fishing licence)
 ziff,250,Mackerel
 ziff,251,Swordfish
-ziff,252,"Tuna, Albacore"
-ziff,253,"Tuna, Bigeye"
-ziff,254,"Tuna, Bluefin"
-ziff,255,"Tuna, Skipjack"
-ziff,256,"Tuna, Yellowfin"
+ziff,252,Tuna (Albacore)
+ziff,253,Tuna (Bigeye)
+ziff,254,Tuna (Bluefin)
+ziff,255,Tuna (Skipjack)
+ziff,256,Tuna (Yellowfin)
 ziff,259,Unspecified tuna
 ziff,260,Billfish
 ziff,261,blue marlin
@@ -83,7 +83,7 @@ ziff,371,Basking shark
 ziff,372,Blue shark
 ziff,375,Shortfin mako
 ziff,379,Unspecified shark
-ziff,399,"Unspecified, other fish"
+ziff,399,Unspecified (other fish)
 ziff,599,pelagics and estuary
 ziff,600,Surf Clam
 ziff,601,Soft-shell Clam
@@ -103,7 +103,7 @@ ziff,617,Iceland scallop
 ziff,619,Sea cucumber
 ziff,620,Common northern moon-shelll
 ziff,624,Arctic wedgeclam
-ziff,627,"Squid, Loligo"
+ziff,627,Squid (Loligo)
 ziff,699,Unspecified molluscs
 ziff,700,Lobster
 ziff,701,Toad crab
@@ -140,7 +140,7 @@ ziff,914,Tuna livers
 ziff,915,Preserved cod livers
 ziff,916,Shark livers
 ziff,919,Unspecified livers
-ziff,920,"Tongues, sounds, cheeks"
+ziff,920,Tongues/sounds/cheeks
 ziff,921,Herring scales
 ziff,922,roes
 ziff,923,Fish fins
@@ -150,22 +150,22 @@ ziff,926,Shark liver oil
 ziff,927,Caviar
 ziff,928,Lumpfish roe
 ziff,929,Gonad (scallops)
-ziff,930,"Harp seal, whitecoat"
-ziff,931,"Harp seal, ragged jacket"
-ziff,932,"Harp seal, beater"
-ziff,933,"Harp seal, bedlamer"
-ziff,934,"Harp seal, old"
-ziff,935,"Hood seal, young"
-ziff,936,"Hood seal, old"
-ziff,937,"Hood seal, unspecified"
-ziff,938,"Seal, unspecified skin"
+ziff,930,Harp seal (whitecoat)
+ziff,931,Harp seal (ragged jacket)
+ziff,932,Harp seal (beater)
+ziff,933,Harp seal (bedlamer)
+ziff,934,Harp seal (old)
+ziff,935,Hood seal (young)
+ziff,936,Hood seal (old)
+ziff,937,Hood seal (unspecified)
+ziff,938,Seal (unspecified skin)
 ziff,939,Seal oil
-ziff,940,"Whale, fin"
-ziff,941,"Whale, sei"
-ziff,942,"Whale, sperm"
+ziff,940,Whale (fin)
+ziff,941,Whale (sei)
+ziff,942,Whale (sperm)
 ziff,943,Unspecified whales
-ziff,944,"Whale, minke"
-ziff,945,"Whale, pothead"
+ziff,944,Whale (minke)
+ziff,945,Whale (pothead)
 ziff,950,Exploratory herring (fishing licence)
 ziff,951,Exploratory mackerel (fishing licence)
 ziff,952,Exploratory scallop (fishing licence)
@@ -177,7 +177,7 @@ ziff,957,Exploratory winkles (fishing licence)
 ziff,958,Northern shrimp (fishing licence)
 ziff,959,Exploratory shrimp (fishing licence)
 ziff,960,Mackerel head
-ziff,961,"Stimpson's surf clam, expl. (licence)"
+ziff,961,Stimpson's surf clam expl. (licence)
 ziff,962,Exploratory soft clam (fishing licence)
 ziff,963,Exploratory crab (fishing licence)
 ziff,964,Exploratory sea urchin (fishing licence)
@@ -187,7 +187,7 @@ ziff,967,Exploratory shark (fishing licence)
 ziff,968,Allocation crab
 ziff,969,Shrimp allocation
 ziff,970,Leatherback turtle
-ziff,971,"Heads, Groundfish"
+ziff,971,Heads (Groundfish)
 ziff,997,No fee for this species (license only)
 ziff,998,For transporting fish (fishing licence)
 ziff,999,Unspecified items
