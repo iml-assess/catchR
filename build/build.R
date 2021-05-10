@@ -21,5 +21,7 @@
 # devtools::load_all() 
 
 # preview help
-# rstudioapi::previewRd('man/read.ziff.Rd')
+# rstudioapi::previewRd('man/fit.armatrix.Rd')
 # rstudioapi::previewRd('man/find.species.Rd')
+
+# for use of cpps (TMB) see https://rtbecard.gitlab.io/2018/02/11/Distributing-TMB-in-R-packages.html
