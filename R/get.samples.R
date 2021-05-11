@@ -58,6 +58,16 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
     
     my.levels <- sapply(c('period', 'region', 'gear'), function(x) sort(unique(c(lf[, x], al[, x])))) # unique levels of each group
     
+    
+    # 3) Global alk
+    alk_global <- al %>% 
+                  group_by(length, age) %>% 
+                  count %>% 
+                  group_by(length) %>% 
+                  mutate(perc = (n / sum(n)) * 100) %>% 
+                  ungroup %>%
+                  filter(perc >= 10) # ages that were found in < 10 % are considered too rare
+
     # 3) For each line of catch, i.e. for each combination of year-period-region-gear, get lf and al data to use in caa calculations
     pb <- txtProgressBar(min = 0, max = nrow(catch), style = 3) # set the progress bar
     ret <- lapply(1:nrow(catch), function(x){
@@ -86,38 +96,9 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
         pn <- month(dn) # neigbouring periods
         yn <- y + c(-1, 0, 1) # neigbouring years
         
-        # 3.2) ALK samples ####
-        # 3.2.1) Get samples to be used
-        o.al <- 1 # first option
-        n.al <- 0 # number of samples found
-        while(n.al < tresh.al & o.al <= 12){# keep looking as long as n not big enough and next step possible
-            id <- find.samples(al,o.al,d,dn,g,r,y,yn,p,pn) # find samples according to step o
-            this.al <- al[id,] # select them
-            n.al <- this.al %>% distinct_at(alcol[c(1:5)]) %>% nrow # count unique samples
-            o.al <- o.al + 1                                                             # go to next step
-        }
-        # 3.2.2) Get age-length key
-        if(n.al==0){
-            warning(paste0('** for catch level ', x, ' no age-length key exists**'))
-            age.key <- data.frame(length = -1, n.agekey = 0)                # use -1 to indicate problems 
-        }else{
-            if(n.al < tresh.al){
-                warning(paste0('** for catch level ', x, ' the age-length key threshold was not reached**'))
-            }
-            age.key <- this.al %>% # age key for this group
-                group_by(length, age) %>% 
-                count() %>%                   # (gavaris:n'ijk )
-                group_by(length) %>% 
-                mutate(prop = n / sum(n),     # (gavaris:p'ijk )
-                       n.agekey = sum(n)) %>% # (gavaris:n'jk )
-                ungroup() %>% 
-                pivot_wider(id_cols = c("length", "n.agekey"), names_from = "age", names_prefix = "age.", # put it in a wide format
-                                values_from = "prop", values_fill = 0) %>% 
-                as.data.frame()
-        }
         
-        # 3.3) LF samples ####
-        # 3.3.1) Get samples to be used
+        # 3.2) LF samples ####
+        # 3.2.1) Get samples to be used
         o.lf <- 1 # first option
         n.lf <- 0 # number of samples found
         while(n.lf < tresh.lf & o.lf <= 12){
@@ -126,7 +107,8 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
             n.lf <- this.lf %>% distinct_at(lfcol[1:5]) %>% nrow # count unique samples                      
             o.lf <- o.lf + 1 # go to next step
         }
-        # 3.3.2) Get length frequency distribution
+        
+        # 3.2.2) Get length frequency distribution
         if(n.lf==0){
             warning(paste0('** for catch level ', x, ' no length-frequency exists**'))
             lf.key <- data.frame(length = -1, n.lf = 0, lf.prop = 0, weight.sample = 0, weight.unit = 0)
@@ -144,6 +126,44 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
                       as.data.frame()
         }
         
+        # 3.3) ALK samples ####
+        
+        ages <- alk_global %>% filter(length %in% lf.key$length) %>% pull(age) %>% unique %>% sort # ages that the following alk should contain.
+        
+        # 3.3.1) Get samples to be used
+        o.al <- 1 # first option
+        n.al <- 0 # number of samples found
+        a.al <- 1 # if all ages from ages are found in samples used. 1 = initial dumb value
+        #while(all(n.al >= tresh.al && a.al == 0) == T){
+        while(n.al < tresh.al || a.al > 0){# keep looking as long as n.al not big enough and ages required are still missing
+            id <- find.samples(al,o.al,d,dn,g,r,y,yn,p,pn) # find samples according to step o
+            this.al <- al[id,] # select them
+            n.al <- this.al %>% distinct_at(alcol[c(1:5)]) %>% nrow # count unique samples
+            o.al <- o.al + 1 # go to next step
+            a.al <- length(setdiff(ages, this.al$age))
+            if (o.al > 12) break # cannot go any further in the search. Will work with aggregation level 12.
+        }
+        
+        # 3.3.2) Get age-length key
+        if(n.al==0){
+            warning(paste0('** for catch level ', x, ' no age-length key exists**'))
+            age.key <- data.frame(length = -1, n.agekey = 0)                # use -1 to indicate problems 
+        }else{
+            if(n.al < tresh.al){
+                warning(paste0('** for catch level ', x, ' the age-length key threshold was not reached**'))
+            }
+            age.key <- this.al %>% # age key for this group
+                group_by(length, age) %>% 
+                count() %>%                   # (gavaris:n'ijk )
+                group_by(length) %>% 
+                mutate(prop = n / sum(n),     # (gavaris:p'ijk )
+                       n.agekey = sum(n)) %>% # (gavaris:n'jk )
+                ungroup() %>% 
+                pivot_wider(id_cols = c("length", "n.agekey"), names_from = "age", names_prefix = "age.", # put it in a wide format
+                            values_from = "prop", values_fill = 0) %>% 
+                as.data.frame()
+        }
+
         # 3.4) Bind and fill up the gaps ####
         # 3.4.1) Bind length frequency and age-length keys
         ret <- merge(lf.key, age.key, all.x = T)  # samples for which age but not length are directly excluded
@@ -192,6 +212,8 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
     # reordering of ret
     ret <- ret[, c("id", cacol[1:5], "length", "n.lf", "lf.prop", "weight.sample", "weight.sample.tot", "weight.unit",
                    "n.agekey", "n.lftot", paste0("age.", ages), "nsample.lengthfreq", "nsample.agelength", "option.lengthfreq", "option.agelength")]
+    ret <- ret %>% as_tibble
+    
     return(ret)
 }
 
