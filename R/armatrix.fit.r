@@ -36,7 +36,7 @@
 ##' d <- expand.grid(year=2001:2010,age=1:10)
 ##' d$x <- exp(log(d$age)+rnorm(nrow(d),1,0.1))
 ##' d$cv <- d$x/10
-##' fit <- do.call(armatrix,as.list(d))
+##' fit <- do.call(armatrix.fit,as.list(d))
 armatrix.fit <- function(year,age,x,cv,shrink.cv=0.5,...){
     
     if(missing(year)) stop("argument 'year' is missing, with no default")
