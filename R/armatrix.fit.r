@@ -55,7 +55,7 @@ armatrix.fit <- function(year,age,x,cv,shrink.cv=0.5,...){
     id0 <- cv==0
     if(any(id0)){
         if(all(id0)) stop('not all cv should be zero')
-        warning('0 cvs replaced by 95% quantile')
+        warning('cvs equal to 0 replaced by value of historic 95% quantile')
         upper.cv <- tapply(cv[!id0],age[!id0],quantile,prob=0.95)
         cv[id0] <- upper.cv[age[which(id0)]-min(age)+1]
     }

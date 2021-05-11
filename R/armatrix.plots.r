@@ -46,8 +46,9 @@ armatrix.predobs <- function(x,xlab='Year',ylab='Age',title='Standardized residu
 ##' @param ylab ylab
 ##' @param title title
 ##' @details ...
-##' @import ggplot2 gridExtra
+##' @import ggplot2
 ##' @importFrom grid unit.pmax
+##' @importFrom gridExtra grid.arrange
 ##' @rdname armatrix.effects
 ##' @export
 armatrix.effects <- function(x){
@@ -117,6 +118,7 @@ armatrix.pred <- function(x,xlab='Year',ylab='Age',title='Standardized residuals
 ##' @param ylab ylab
 ##' @details ...
 ##' @import ggplot2
+##' @importFrom gridExtra grid.arrange
 ##' @rdname armatrix.res2
 ##' @export  
 armatrix.res2 <- function(x,ylab='Standardized residuals'){

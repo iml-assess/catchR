@@ -16,6 +16,13 @@
 # devtools::install()     # install package
 
 
+#roxygenise(".", clean = TRUE)
+devtools::load_all(".")
+document(".")
+build(pkg = ".", manual = TRUE)
+check(".", manual = TRUE )
+install("../temperature", reload = TRUE)
+
 ##### Other helpful stuff #####
 # Faster load (no full installation)
 # devtools::load_all() 

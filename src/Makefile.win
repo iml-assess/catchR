@@ -1,6 +1,6 @@
 all: armatrix.dll
 
-template1.dll: armatrix.cpp
+armatrix.dll: armatrix.cpp
 	Rscript --vanilla -e "TMB::compile('armatrix.cpp', '-O1 -g',DLLFLAGS='')"
 
 clean:

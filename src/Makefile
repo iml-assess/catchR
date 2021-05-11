@@ -1,6 +1,6 @@
 all: armatrix.so
 
-armatrix.so: template1.cpp
+armatrix.so: armatrix.cpp
 	Rscript --vanilla -e "TMB::compile('armatrix.cpp','-O0 -g')"
 
 clean:
