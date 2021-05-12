@@ -10,15 +10,15 @@
 ##' @details 
 #' Used to calculate catch-at-age, weight-at-age and length-frequency distributions.
 #' 
-#' Attributes length-frequencies and age-length keys to a catch level based on a 12 step approach (see steps below). 
+#' Attributes length-frequencies and age-length keys to a catch stratum based on a 12 step approach (see steps below). 
 #' 
 #' For the length-frequencies, the following criteria can be used to determine a representative amount of samples has been found:
 #' I. minimum number of samples (tresh.lf).
 #' 
 #' For the age-length-keys, the following criteria can be used to determine a representative amount of samples has been found:
 #' I. minimum number of samples (tresh.al).
-#' II. match with the lf.key (prob.al).
-#' III. minimum number of fish (tresh.al.fish), so that small or incomplete age key samples can still be used if present.
+#' II. minimum number of fish (tresh.al.fish), so that small or incomplete age key samples can still be used if present.
+#' III. Maximum likelihood (0-1, default =0.95) allowed for any length of a stratum-specific LF distribution to be of an age not included in the ALK (prob.al). This can be used to ensure that the ALK matches sufficiently with the LF results.
 #' 
 #' Regions of the catch (e.g., 3P) can be broader then the sample regions (e.g., 3Pn). Sample regions containing the catch region (such as the 3Pn example) will all be used.
 #' When catch in a certain year is not attributed to a certain region, gear or period, that factor is ignored (e.g., catch with no gear will have samples that could be from any gear)
@@ -53,7 +53,7 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, tresh.al.fish
     if(!setequal(names(catch), cacol)) stop(paste0('Colnames of catch need to be: ', paste(cacol, collapse = ', ')))
     if(!setequal(names(lf), lfcol))    stop(paste0('Colnames of lf need to be: ',    paste(lfcol, collapse = ', ')))
     if(!setequal(names(al), alcol))    stop(paste0('Colnames of al need to be: ',    paste(lfcol, collapse = ', ')))
-    if(any(duplicated(catch[, cacol[1:4]]))) stop('Only one catch value per level allowed.') # one line per level allowed
+    if(any(duplicated(catch[, cacol[1:4]]))) stop('Only one catch value per stratum allowed.') # one line per stratum allowed
     
     period.unit <- match.arg(period.unit)
     
@@ -117,11 +117,11 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, tresh.al.fish
         }
         # 4.2.2) Get length frequency distribution
         if(n.lf==0){
-            warning(paste0('** for catch level ', x, ' no length-frequency exists**'))
+            warning(paste0('** for catch stratum ', x, ' no length-frequency exists**'))
             lf.key <- data.frame(length = -1, n.lf = 0, lf.prop = 0, weight.sample = 0, weight.unit = 0)
         }else{
             if(n.lf < tresh.lf){
-                warning(paste0('** for catch level ', x, ' the length-frequency threshold was not reached**'))
+                warning(paste0('** for catch stratum ', x, ' the length-frequency threshold was not reached**'))
             }
             lf.key <- this.lf %>%
                       group_by(length) %>% 
@@ -154,11 +154,11 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, tresh.al.fish
         }
         # 4.3.2) Get age-length key
         if(n.al==0){
-            warning(paste0('** for catch level ', x, ' no age-length key exists**'))
+            warning(paste0('** for catch stratum ', x, ' no age-length key exists**'))
             age.key <- data.frame(length = -1, n.agekey = 0)                # use -1 to indicate problems 
         }else{
             if(n.al < tresh.al){
-                warning(paste0('** for catch level ', x, ' the age-length key threshold was not reached**'))
+                warning(paste0('** for catch stratum ', x, ' the age-length key threshold was not reached**'))
             }
             age.key <- this.al %>% # age key for this group
                 group_by(length, age) %>% 
@@ -254,7 +254,7 @@ fill.multinom <- function(df, acol, lcol, id=NULL, zero=FALSE){
     len  <- df[,lcol]
     if(ncol(alen) == 1){ # if there is only one age class than the likelihood is always 1??
         new <- rep(1, nrow(alen))
-        warning(paste0('** for catch level ', id, ' only one age class was found **'))
+        warning(paste0('** for catch stratum ', id, ' only one age class was found **'))
     }else{ # model if there are multiple age classes
         m <- multinom(alen~len, trace = F, maxit = 1500)
         if (m$convergence != 0) warning(paste('** Non-convergence when filling gaps for id', id))
