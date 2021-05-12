@@ -104,7 +104,7 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, tresh.al.fish
         }
         pn <- month(dn) # neigbouring periods
         yn <- y + c(-1, 0, 1) # neigbouring years
-        
+
         # 4.2) LF samples ####
         # 4.2.1) Get samples to be used
         o.lf <- 1 # first option
@@ -115,6 +115,7 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, tresh.al.fish
             n.lf <- nrow(unique(this.lf[,lfcol[1:5]])) # count unique samples 
             o.lf <- o.lf + 1 # go to next step
         }
+
         # 4.2.2) Get length frequency distribution
         if(n.lf==0){
             warning(paste0('** for catch level ', x, ' no length-frequency exists**'))
@@ -132,7 +133,6 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, tresh.al.fish
                       filter(n.lf > 0) %>%  # lines where n.lf = 0 are impossible. If present, remove
                       as.data.frame()
         }
-        
         # 4.3) ALK samples ####
         # 4.3.1) Get samples to be used
         o.al <- 1 # first option
@@ -170,9 +170,8 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, tresh.al.fish
                 pivot_wider(id_cols = c("length", "n.agekey"), names_from = "age", names_prefix = "age.", # put it in a wide format
                             values_from = "prop", values_fill = 0) %>% 
                 as.data.frame()
-            # sort age columns
         }
-        
+
         # 3.4) Bind and fill up the gaps ####
         # 3.4.1) Bind length frequency and age-length keys
         ret <- merge(lf.key, age.key, all=TRUE) 
@@ -207,6 +206,8 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, tresh.al.fish
     # reordering of ret
     ret <- ret[, c("id", cacol[1:5], "length", "n.lf", "lf.prop", "weight.sample", "weight.sample.tot", "weight.unit",
                    "n.agekey", "n.lftot", paste0("age.", ages), "nsample.lengthfreq", "nsample.agelength", "option.lengthfreq", "option.agelength")]
+    ret <- ret %>% as_tibble
+    
     return(ret)
 }
 
