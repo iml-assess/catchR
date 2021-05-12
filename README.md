@@ -23,7 +23,6 @@ To get catch-, weight- and length at age, the following workflow can be used:
 4. read.bio, for reading in data usually named 'carbio'
 5. fit.lw, for fitting length-weight relationships
 6. get.samples, for attributing samples to a certain catch level (catch by region, gear and period)
-7. get.caa, for calculating catch/weight/length at age
-
-# To do list
-- remove dependency plyr
+7. get.caa, for calculating catch- and weight-at-age
+8. get.cal, for calculating caught length-at-age 
+9. armatrix.fit and plots for smoothing and filling gaps of e.g., weight-at-age
