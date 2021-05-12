@@ -3,10 +3,22 @@
 ##' @param lf Data.frame with these columns: year, period, region, gear, length, weight.unit, n, sample.id.
 ##' @param al Data.frame with these columns: year, period, region, gear, length, age, sample.id.
 ##' @param tresh.al Threshold of minimum number of samples required for age-length keys. By default = 2.
-##' @param tresh.al Threshold of minimum number of samples required for length frequencies. By default = 2.
+##' @param tresh.lf Threshold of minimum number of samples required for length frequencies. By default = 2.
+##' @param tresh.al.fish Treshold of minimum number of fish required for age-length keys. By default = 5
 ##' @param period.unit Whether catch and lf are grouped by "month" (default) or "quarter".
+##' @param prob.al Maximum likelihood (0-1, default =0.95) allowed for any length of a stratum-specific LF distribution to be of an age not included in the ALK. If it is prob.al likely that an age is missing, the algorithm will continue adding samples.
 ##' @details 
-#' Attributes length-frequencies and age-length keys to a catch level based on a 12 step approach (see steps below). Used to calculate catch-at-age, weight-at-age and length-frequency distributions.
+#' Used to calculate catch-at-age, weight-at-age and length-frequency distributions.
+#' 
+#' Attributes length-frequencies and age-length keys to a catch level based on a 12 step approach (see steps below). 
+#' 
+#' For the length-frequencies, the following criteria can be used to determine a representative amount of samples has been found:
+#' I. minimum number of samples (tresh.lf).
+#' 
+#' For the age-length-keys, the following criteria can be used to determine a representative amount of samples has been found:
+#' I. minimum number of samples (tresh.al).
+#' II. match with the lf.key (prob.al).
+#' III. minimum number of fish (tresh.al.fish), so that small or incomplete age key samples can still be used if present.
 #' 
 #' Regions of the catch (e.g., 3P) can be broader then the sample regions (e.g., 3Pn). Sample regions containing the catch region (such as the 3Pn example) will all be used.
 #' When catch in a certain year is not attributed to a certain region, gear or period, that factor is ignored (e.g., catch with no gear will have samples that could be from any gear)
@@ -28,11 +40,10 @@
 #'  \item neighbouring year
 #' }
 ##' @import dplyr lubridate tidyr
-##' @importFrom nnet multinom
 ##' @importFrom data.table rbindlist
 ##' @rdname get.samples
 ##' @export
-get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit = c('month', 'quarter')){
+get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, tresh.al.fish = 5, period.unit = c('month', 'quarter'), prob.al=0.95){
     
     # 1) Validation of the arguments
     cacol <- c('year', 'period', 'region', 'gear', 'catch') # required columns in catch
@@ -46,29 +57,27 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
     
     period.unit <- match.arg(period.unit)
     
-    # 2) Minor calculations and variable creation
-    options(dplyr.summarise.inform = FALSE) # https://www.tidyverse.org/blog/2020/05/dplyr-1-0-0-last-minute-additions/
-    lf <- lf %>% 
-          group_by_at(lfcol[1:5]) %>% 
-          mutate(prop = n/sum(n)) %>% # proportion of each length in each sample
-          as.data.frame()
+    if(prob.al<0 | prob.al>1) warning("prob.al should be restricted to 0-1")
     
+    # 2) Minor calculations and variable creation
+    id <- as.factor(apply(lf[,lfcol[1:5]],1,paste,collapse=""))
+    lf$prop <- ave(lf$n, id, FUN = function(z) z/sum(z))
     lf$date <- with(lf, ymd(paste(year, period, '01')))
     al$date <- with(al, ymd(paste(year, period, '01')))
     
     my.levels <- sapply(c('period', 'region', 'gear'), function(x) sort(unique(c(lf[, x], al[, x])))) # unique levels of each group
     
+    # 3) Global alk (alg): from all years and all ages available.
+    alg <- table(al$length,al$age)
+    alg <- prop.table(alg,1)
+    alg <- cbind(length=as.numeric(rownames(alg)),data.frame(rbind(alg)))
     
-    # 3) Global alk
-    alk_global <- al %>% 
-                  group_by(length, age) %>% 
-                  count %>% 
-                  group_by(length) %>% 
-                  mutate(perc = (n / sum(n)) * 100) %>% 
-                  ungroup %>%
-                  filter(perc >= 10) # ages that were found in < 10 % are considered too rare
+    le <- expand.grid(length=seq(min(alg$length),max(alg$length),min(diff(alg$length))))
+    alg <- merge(le,alg) # matplot(alg[,-1])
+    
+    alg <- fill.multinom(df = alg, acol = 2:ncol(alg), lcol = 1, id='global', zero = TRUE) # matplot(alg[,-1])
 
-    # 3) For each line of catch, i.e. for each combination of year-period-region-gear, get lf and al data to use in caa calculations
+    # 4) For each line of catch, i.e. for each combination of year-period-region-gear, get lf and al data to use in caa calculations
     pb <- txtProgressBar(min = 0, max = nrow(catch), style = 3) # set the progress bar
     ret <- lapply(1:nrow(catch), function(x){
         # get id and total catch
@@ -84,7 +93,7 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
         if(is.na(g)) g <- my.levels$gear
         if(is.na(r)) r <- my.levels$region else r <- my.levels$region[grepl(r, as.character(my.levels$region), fixed = T)]  # samples from region and subregions
         
-        # 3.1) Neighbouring dates/months/years 
+        # 4.1) Neighbouring dates/months/years 
         d  <- ymd(paste(y, p, '01')) # date (for semesters this will be month 1 to 4, but that doesn't matter)
         dn <- d # neigbouring dates. If no period data, all periods allowed  (so option 1 and 2 are the same)
         if(!is.na(catch[x, 'period'])){      # If period data; normal way
@@ -95,20 +104,19 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
         }
         pn <- month(dn) # neigbouring periods
         yn <- y + c(-1, 0, 1) # neigbouring years
-        
-        
-        # 3.2) LF samples ####
-        # 3.2.1) Get samples to be used
+
+        # 4.2) LF samples ####
+        # 4.2.1) Get samples to be used
         o.lf <- 1 # first option
         n.lf <- 0 # number of samples found
-        while(n.lf < tresh.lf & o.lf <= 12){
+        while(n.lf < tresh.lf && o.lf <= 12){
             id <- find.samples(lf,o.lf,d,dn,g,r,y,yn,p,pn) # find samples according to step o
             this.lf <- lf[id, ] # select them
-            n.lf <- this.lf %>% distinct_at(lfcol[1:5]) %>% nrow # count unique samples                      
+            n.lf <- nrow(unique(this.lf[,lfcol[1:5]])) # count unique samples 
             o.lf <- o.lf + 1 # go to next step
         }
-        
-        # 3.2.2) Get length frequency distribution
+
+        # 4.2.2) Get length frequency distribution
         if(n.lf==0){
             warning(paste0('** for catch level ', x, ' no length-frequency exists**'))
             lf.key <- data.frame(length = -1, n.lf = 0, lf.prop = 0, weight.sample = 0, weight.unit = 0)
@@ -125,26 +133,26 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
                       filter(n.lf > 0) %>%  # lines where n.lf = 0 are impossible. If present, remove
                       as.data.frame()
         }
-        
-        # 3.3) ALK samples ####
-        
-        ages <- alk_global %>% filter(length %in% lf.key$length) %>% pull(age) %>% unique %>% sort # ages that the following alk should contain.
-        
-        # 3.3.1) Get samples to be used
+        # 4.3) ALK samples ####
+        # 4.3.1) Get samples to be used
         o.al <- 1 # first option
         n.al <- 0 # number of samples found
-        a.al <- 1 # if all ages from ages are found in samples used. 1 = initial dumb value
-        #while(all(n.al >= tresh.al && a.al == 0) == T){
-        while(n.al < tresh.al || a.al > 0){# keep looking as long as n.al not big enough and ages required are still missing
+        f.al <- 0 # number of fish found
+        a.al <- FALSE # does the ALK match the LF distribution
+        while(o.al<=12 && !(n.al>=tresh.al && a.al && f.al>=tresh.al.fish)){ # only continue if steps available AND both quality criteria (number of samples, coverage with LF dist) are met
             id <- find.samples(al,o.al,d,dn,g,r,y,yn,p,pn) # find samples according to step o
             this.al <- al[id,] # select them
-            n.al <- this.al %>% distinct_at(alcol[c(1:5)]) %>% nrow # count unique samples
-            o.al <- o.al + 1 # go to next step
-            a.al <- length(setdiff(ages, this.al$age))
-            if (o.al > 12) break # cannot go any further in the search. Will work with aggregation level 12.
+            n.al <- nrow(unique(this.al[,alcol[1:5]])) # count unique samples
+            f.al <- nrow(this.al) # count fish
+            if(n.al>0){
+                le.miss <- lf.key[!lf.key$length %in% this.al$length,1]  # lengths not covered by ALK (missing)
+                le.prob <- alg[alg$length %in% le.miss,!names(alg) %in% paste0('X',unique(this.al$age))] # for any missing length, probabilities that they are of an age currently not yet included in the ALK
+                le.prob <- rowSums(le.prob[,-1,drop=FALSE]) # total probability
+                a.al <- any(le.prob>prob.al) # if for any length it is at least prob.al likely that an age is missing, criteria is not met
+            } 
+            o.al <- o.al + 1                                        # go to next step
         }
-        
-        # 3.3.2) Get age-length key
+        # 4.3.2) Get age-length key
         if(n.al==0){
             warning(paste0('** for catch level ', x, ' no age-length key exists**'))
             age.key <- data.frame(length = -1, n.agekey = 0)                # use -1 to indicate problems 
@@ -166,27 +174,13 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, period.unit =
 
         # 3.4) Bind and fill up the gaps ####
         # 3.4.1) Bind length frequency and age-length keys
-        ret <- merge(lf.key, age.key, all.x = T)  # samples for which age but not length are directly excluded
+        ret <- merge(lf.key, age.key, all=TRUE) 
         cola <- grep('age\\.', names(ret)) # columns with ages
         
         # 3.4.2) Filling the gaps
-        if(any(is.na(ret[, cola])) & n.lf >= tresh.lf & n.al >= tresh.al){ # If for a given length I don't have an age-length key but I should have
-            mod <- as.matrix(na.omit(ret[, c(1, cola)]))   # matrix with the age-length key
-            alen <- mod[, -1, drop = FALSE]
-            len  <- mod[, 1]
-            if(ncol(alen) == 1){ # if there is only one age class than the likelihood is always 1??
-                new <- rep(1,nrow(ret))
-                warning(paste0('** for catch level ', x, ' only one age class was found **'))
-            }else{ # model if there are multiple age classes
-                m <- multinom(alen~len, trace = F, maxit = 1500)
-                if(m$convergence != 0) warning(paste('** Non-convergence when filling gaps for id', x))
-                new <- predict(m, newdata = data.frame(len = ret$length), type = "probs") # predict for all lengths in the freq data
-                new <- round(new, 3) # acceptable precision level (to avoid 0.0000001 % chances of absurd age-length combos)
-            }
-            
-            ret[, cola][is.na(ret[, cola])] <- new[is.na(ret[, cola])] # replace NA's by predictions
-            ret[is.na(ret$n.agekey), 'n.agekey'] <- 0 # there were 0 age key samples
-        }
+        ret <- fill.multinom(df = ret, acol = cola, lcol = 1, id=x)
+        ret <- ret[!is.na(ret$n.lf),]             # in alk but not lf
+        ret[is.na(ret$n.agekey), 'n.agekey'] <- 0 # 0 age key samples
 
         # 3.5) Return it all ####
         ret <- cbind(id = x, 
@@ -246,3 +240,38 @@ find.samples <- function(df,o,d,dn,g,r,y,yn,p,pn){
            '12' = {id <- with(df, year %in% yn)})                                             # neighbouring year
     return(id)
 }
+
+##' Fill gaps in age-length keys
+##' @param df Data.frame with columns length and ages, where NA values need to be replaced
+##' @param acol Vector of ids of age columns 
+##' @param lcol Id of length column (integer)
+##' @param id Identifier for warning messages
+##' @param zero Logical. Allow replacement of zero values.
+##' @details Functions that uses the nnet::multinom function to impute age probabilities for lengths that were found in LF samples, but absent of AL samples.
+##' @importFrom nnet multinom
+##' @rdname multinom_fill
+fill.multinom <- function(df, acol, lcol, id=NULL, zero=FALSE){
+    alen <- as.matrix(df[,acol,drop=FALSE])
+    len  <- df[,lcol]
+    if(ncol(alen) == 1){ # if there is only one age class than the likelihood is always 1??
+        new <- rep(1, nrow(alen))
+        warning(paste0('** for catch level ', id, ' only one age class was found **'))
+    }else{ # model if there are multiple age classes
+        m <- multinom(alen~len, trace = F, maxit = 1500)
+        if (m$convergence != 0) warning(paste('** Non-convergence when filling gaps for id', id))
+        new <- predict(m, newdata = data.frame(len = df$length), type = "probs") # predictions for all lengths found in df
+        new <- round(new, 3) # acceptable precision level (to avoid 0.0000001 % chances of absurd age-length combos)
+    }
+    
+    # replace NA's by predictions
+    df[, acol][is.na(df[, acol])] <- new[is.na(df[, acol])] 
+    
+    # replace zeros by predictions
+    if(zero){
+        q <- 0.001                 # acceptable precision level
+        id <- new>q & df[,acol]==0 # will replace the zeros in ALK that are most likely not zeros
+        df[,acol][id] <- new[id] 
+    }
+    return(df)
+}
+
