@@ -139,18 +139,22 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, tresh.al.fish
         n.al <- 0 # number of samples found
         f.al <- 0 # number of fish found
         a.al <- FALSE # does the ALK match the LF distribution
-        while(o.al<=12 && !(n.al>=tresh.al && a.al && f.al>=tresh.al.fish)){ # only continue if steps available AND both quality criteria (number of samples, coverage with LF dist) are met
+        while(o.al <= 12 && any(tresh.al >= n.al, !a.al, tresh.al.fish >= f.al)){ # only continue if steps available AND both quality criteria (number of samples, coverage with LF dist) are met
             id <- find.samples(al,o.al,d,dn,g,r,y,yn,p,pn) # find samples according to step o
             this.al <- al[id,] # select them
             n.al <- nrow(unique(this.al[,alcol[1:5]])) # count unique samples
             f.al <- nrow(this.al) # count fish
-            if(n.al>0){
+            if(n.al > 0){
                 le.miss <- lf.key[!lf.key$length %in% this.al$length,1]  # lengths not covered by ALK (missing)
-                le.prob <- alg[alg$length %in% le.miss,!names(alg) %in% paste0('X',unique(this.al$age))] # for any missing length, probabilities that they are of an age currently not yet included in the ALK
-                le.prob <- rowSums(le.prob[,-1,drop=FALSE]) # total probability
-                a.al <- any(le.prob>prob.al) # if for any length it is at least prob.al likely that an age is missing, criteria is not met
+                le.prob <- alg[alg$length %in% le.miss, !names(alg) %in% paste0('X',unique(this.al$age)), drop = F] # for any missing length, probabilities that they are of an age currently not yet included in the ALK
+                if (length(le.miss) == 0 | ncol(le.prob) == 1){
+                    a.al <- TRUE
+                } else {
+                    le.prob <- rowSums(le.prob[,-1, drop = FALSE]) # total probability
+                    a.al <- !any(le.prob >= prob.al) # if for any length it is at least prob.al likely that an age is missing, criteria is not met
+                }
             } 
-            o.al <- o.al + 1                                        # go to next step
+            o.al <- o.al + 1 # go to next step
         }
         # 4.3.2) Get age-length key
         if(n.al==0){
@@ -165,9 +169,9 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, tresh.al.fish
                 count() %>%                   # (gavaris:n'ijk )
                 group_by(length) %>% 
                 mutate(prop = n / sum(n),     # (gavaris:p'ijk )
-                       n.agekey = sum(n)) %>% # (gavaris:n'jk )
+                       n.al = sum(n)) %>% # (gavaris:n'jk )
                 ungroup() %>% 
-                pivot_wider(id_cols = c("length", "n.agekey"), names_from = "age", names_prefix = "age.", # put it in a wide format
+                pivot_wider(id_cols = c("length", "n.al"), names_from = "age", names_prefix = "age.", # put it in a wide format
                             values_from = "prop", values_fill = 0) %>% 
                 as.data.frame()
             # sort age columns
@@ -175,19 +179,20 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, tresh.al.fish
         
         # 3.4) Bind and fill up the gaps ####
         # 3.4.1) Bind length frequency and age-length keys
-        ret <- merge(lf.key, age.key, all=TRUE) 
+        ret <- merge(lf.key, age.key, all.x = TRUE) 
         cola <- grep('age\\.', names(ret)) # columns with ages
         
         # 3.4.2) Filling the gaps
         ret <- fill.multinom(df = ret, acol = cola, lcol = 1, id=x)
         ret <- ret[!is.na(ret$n.lf),]             # in alk but not lf
-        ret[is.na(ret$n.agekey), 'n.agekey'] <- 0 # 0 age key samples
+        ret[is.na(ret$n.al), 'n.al'] <- 0 # 0 age key samples, meaning it was imputed
 
         # 3.5) Return it all ####
         ret <- cbind(id = x, 
                      catch[x, cacol[1:5]][rep(1, nrow(ret)), ],
                      ret,
                      n.lftot = sum(lf.key$n.lf), # (gavaris:nk) total number of fish measured for length in that combination of year-period-region-gear
+                     n.altot = sum(ret$n.al), # total number of fish used in the ALK after the merge with lf.key (some fish from the age.key could be useless depending of lengths in lf.key)
                      weight.sample.tot = sum(lf.key$weight.sample), # (gavaris:wk) total weight of fish measured for length in that combination year-period-...
                      #weight.unit.mean = sum(lf.key$weight.sample) / sum(lf.key$n.lf),  # (gavaris:wbark)
                      nsample.lengthfreq = n.lf, # Count of samples used to create the LF key
@@ -206,7 +211,7 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, tresh.al.fish
     
     # reordering of ret
     ret <- ret[, c("id", cacol[1:5], "length", "n.lf", "lf.prop", "weight.sample", "weight.sample.tot", "weight.unit",
-                   "n.agekey", "n.lftot", paste0("age.", ages), "nsample.lengthfreq", "nsample.agelength", "option.lengthfreq", "option.agelength")]
+                   "n.agekey", "n.lftot", "n.altot", paste0("age.", ages), "nsample.lengthfreq", "nsample.agelength", "option.lengthfreq", "option.agelength")]
     return(ret)
 }
 
