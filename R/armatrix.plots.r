@@ -29,7 +29,7 @@ armatrix.res <-function(x,xlab='Year',ylab='Age',title='Standardized residuals',
 ##' @import ggplot2
 ##' @rdname armatrix.predobs
 ##' @export
-armatrix.predobs <- function(x,xlab='Year',ylab='Age',title='Standardized residuals',...){
+armatrix.predobs <- function(x,xlab='Year',ylab='Age',title='Predicted vs Observed',...){
     d <- x$output
     ggplot(d,aes(x=year))+
         geom_line(aes(y=pred_exp),col='red')+
@@ -104,7 +104,7 @@ armatrix.cvs <- function(x,xlab='Year',ylab='CV',col=c('black','red'),...){
 ##' @import ggplot2
 ##' @rdname armatrix.pred
 ##' @export
-armatrix.pred <- function(x,xlab='Year',ylab='Age',title='Standardized residuals',...){
+armatrix.pred <- function(x,xlab='Year',ylab='Age',title='Predicted values',...){
     d <- x$output
     ggplot(d,aes(x=year))+
         geom_line(aes(y=pred_exp))+
