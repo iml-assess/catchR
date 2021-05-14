@@ -52,10 +52,10 @@ armatrix.fit <- function(year,age,x,cv,shrink.cv=0.5,...){
     
     if(shrink.cv<0 | shrink.cv>1) warning("shrink.cv restricted to 0-1")
     
-    id0 <- cv==0
+    id0 <- cv==0 | (is.na(cv)&!is.na(x))
     if(any(id0)){
-        if(all(id0)) stop('not all cv should be zero')
-        warning('cvs equal to 0 replaced by value of historic 95% quantile')
+        if(all(id0)) stop('not all cv should be zero or NA')
+        warning('cvs equal to 0/NA replaced by value of historic 95% quantile')
         upper.cv <- tapply(cv[!id0],age[!id0],quantile,prob=0.95)
         cv[id0] <- upper.cv[age[which(id0)]-min(age)+1]
     }
