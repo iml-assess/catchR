@@ -210,8 +210,8 @@ get.samples <- function(catch, lf, al, tresh.al = 2, tresh.lf = 2, tresh.al.fish
     ages <- sort(as.numeric(gsub("age\\.", "", names(ret)[cola]))) # sorted age columns
     
     # reordering of ret
-    ret <- ret[, c("id", cacol[1:5], "length", "n.lf", "lf.prop", "weight.sample", "weight.sample.tot", "weight.unit",
-                   "n.agekey", "n.lftot", "n.altot", paste0("age.", ages), "nsample.lengthfreq", "nsample.agelength", "option.lengthfreq", "option.agelength")]
+    ret <- ret[, c("id", cacol[1:5], "length", "n.lf", "lf.prop", "n.lftot", "weight.sample", "weight.sample.tot", "weight.unit",
+                   "n.al", "n.altot", paste0("age.", ages), "nsample.lengthfreq", "nsample.agelength", "option.lengthfreq", "option.agelength")]
     return(ret)
 }
 
