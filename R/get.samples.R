@@ -272,9 +272,11 @@ fill.multinom <- function(df, acol, lcol, id=NULL, zero=FALSE){
     
     # replace zeros by predictions
     if(zero){
-        q <- 0.001                 # acceptable precision level
+        q <- 0.01                 # when a zero should probably be at least 1%
         id <- new>q & df[,acol]==0 # will replace the zeros in ALK that are most likely not zeros
         df[,acol][id] <- new[id] 
+        s <- matrix(rowSums(df[,acol]),ncol=length(acol),nrow=nrow(df),byrow = FALSE)
+        df[,acol][!id] <- df[,acol][!id]/s[!id]
     }
     return(df)
 }
