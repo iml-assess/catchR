@@ -61,11 +61,12 @@ armatrix.fit <- function(year,age,x,cv,shrink.cv=0.5,...){
     }
     
     mean.cv <- tapply(cv[!id0],age[!id0],mean) 
-    input$se <- (1-shrink.cv)*cv + shrink.cv*mean.cv[age-min(age)+1]
+    input$se <- as.vector((1-shrink.cv)*cv + shrink.cv*mean.cv[age-min(age)+1])
     input$x <- log(x)
     
     date <- expand.grid(year=min(year):max(year), age=min(age):max(age))
     datd <- merge(date, input, all.x = TRUE)
+    datd[is.na(datd)] <- NA  # model does not accept NaN
     dat <- as.list(datd[,-4])
     
     para <- list( 
