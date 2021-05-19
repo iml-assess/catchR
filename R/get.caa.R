@@ -10,6 +10,7 @@ get.caa <- function(x, plus = Inf){
     
     id.age <- grep('age\\.', colnames(x))
     bound <- function(x,y){x<- as.numeric(x);x[x>y]<-y;return(x)}
+    weighted.sd <- function(mu,x,w){if(sum(w)>1)sqrt(sum(w*(x-mu)^2)/(sum(w)-1))else NA} # idem to Hmish package::wtd.var(weight.unit,wtn), see https://en.wikipedia.org/wiki/Weighted_arithmetic_mean 6.1 frequency weights (bessel's correction).  
     
     # calculations
     caa <- x %>%
@@ -21,9 +22,9 @@ get.caa <- function(x, plus = Inf){
         summarise(caan = sum(wtn),                 
                   caaw = sum(wt),                           
                   waa = caaw / caan,      # idem to weighted.mean(weight.unit, wtn)
-                  waa.sd = sqrt(sum(wtn*(weight.unit-waa)^2)/(sum(wtn)-1)), # idem to Hmish package::wtd.var(weight.unit,wtn), see https://en.wikipedia.org/wiki/Weighted_arithmetic_mean 6.1 frequency weights (bessel's correction).  
+                  waa.sd = weighted.sd(waa,weight.unit,wtn), 
                   laa = weighted.mean(length, wtn),
-                  laa.sd = sqrt(sum(wtn*(length-laa)^2)/(sum(wtn)-1)))%>%   # idem to Hmish package::wtd.var(length,wtn), see https://en.wikipedia.org/wiki/Weighted_arithmetic_mean 6.1 frequency weights (bessel's correction). 
+                  laa.sd = weighted.sd(laa,length,wtn))%>%   # idem to Hmish package::wtd.var(length,wtn), see https://en.wikipedia.org/wiki/Weighted_arithmetic_mean 6.1 frequency weights (bessel's correction). 
         as.data.frame()
     return(caa)
 }
