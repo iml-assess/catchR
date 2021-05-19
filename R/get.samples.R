@@ -213,10 +213,11 @@ get.samples <- function(catch, lf, al=NULL, min.al.samples = 2, min.lf.samples =
     cola <- grep('age\\.', names(ret))
     ret[cola][is.na(ret[cola])] <- 0 # some ages can be missing for a certain catch. They are set to 0
     ages <- sort(as.numeric(gsub("age\\.", "", names(ret)[cola]))) # sorted age columns
+    ages <- if(length(ages)==0) NULL else paste0("age.", ages)
     
     # reordering of ret
     ret <- ret[, c("id", cacol[1:5], "length", "n.lf", "lf.prop", "n.lftot", "weight.sample", "weight.sample.tot", "weight.unit",
-                   "n.al", "n.altot", paste0("age.", ages), "nsample.lengthfreq", "nsample.agelength", "option.lengthfreq", "option.agelength")]
+                   "n.al", "n.altot", ages, "nsample.lengthfreq", "nsample.agelength", "option.lengthfreq", "option.agelength")]
     return(ret)
 }
 
