@@ -52,8 +52,8 @@
 ##' @importFrom data.table rbindlist
 ##' @rdname get.samples
 ##' @export
-get.samples <- function(catch, lf, al=NULL, min.al.samples = 2, min.lf.samples = 2, min.al.fish = 5, period.unit = c('month', 'quarter'), 
-                        prob.al=0.95, subsample=TRUE){
+get.samples <- function(catch, lf, al = NULL, min.al.samples = 2, min.lf.samples = 2, min.al.fish = 5, 
+                        period.unit = c('month', 'quarter'), prob.al = 0.95, subsample = TRUE){
     
     # 1) Validation of the arguments
     cacol <- c('year', 'period', 'region', 'gear', 'catch') # required columns in catch
@@ -69,8 +69,8 @@ get.samples <- function(catch, lf, al=NULL, min.al.samples = 2, min.lf.samples =
     
     period.unit <- match.arg(period.unit)
     
-    if(prob.al<0 | prob.al>1) warning("prob.al should be restricted to 0-1")
-    if(!subsample & min.al.samples>min.lf.samples) warning('min.al.samples>min.lf.samples?')
+    if(prob.al < 0 | prob.al > 1) warning("prob.al should be restricted to 0-1")
+    if(!subsample & min.al.samples > min.lf.samples) warning('min.al.samples>min.lf.samples?')
     
     # 2) Minor calculations and variable creation
     id <- as.factor(apply(lf[,lfcol[1:5]],1,paste,collapse=""))
@@ -142,6 +142,7 @@ get.samples <- function(catch, lf, al=NULL, min.al.samples = 2, min.lf.samples =
         n.al <- 0 # number of samples found
         f.al <- 0 # number of fish found
         a.al <- FALSE # does the ALK match the LF distribution
+        mismatch <- FALSE # by default
         if(!mal){
             while(o.al <= 12 && any(min.al.samples >= n.al, !a.al, min.al.fish >= f.al)){ # only continue if steps available AND both quality criteria (number of samples, coverage with LF dist) are met
                 if(subsample | o.al>1) id <- find.samples(al,o.al,y,p,r,g,period.unit) # find samples according to step o, unless no subsample was taken and the ids are the same as for the lf samples
@@ -154,32 +155,37 @@ get.samples <- function(catch, lf, al=NULL, min.al.samples = 2, min.lf.samples =
                     if (length(le.miss) == 0 | ncol(le.prob) == 1){
                         a.al <- TRUE
                     } else {
-                        le.prob <- rowSums(le.prob[,-1, drop = FALSE]) # total probability
-                        a.al <- !any(le.prob >= prob.al) # if for any length it is at least prob.al likely that an age is missing, criteria is not met
-                    }
-                } 
+                        age.avail <- unique(al[al$year %in% c(y-1, y, y + 1),'age'])
+                        age.avail <- intersect(paste0('X',age.avail), names(le.prob)[-1])
+                        le.prob.match <- rowSums(le.prob[,-1, drop = FALSE]) # total probability
+                        le.prob.avail <- rowSums(le.prob[,age.avail, drop = FALSE]) # probability for available ages
+                        a.al <- !any(le.prob.avail >= prob.al) # if for any length it is at least prob.al likely that an age is missing and this age can be found in a sample from this or a neighbouring year, criteria is not met
+                        mismatch <- any(le.prob.match >= prob.al) # for all ages. It might be that a.al is TRUE and the search stops, but this will indicate whether there was a potential mismatch because a certain age was never observed. added to output for quality control                    }
+                    } 
+                }
                 o.al <- o.al + 1 # go to next step
-            }   
+            }
+            if(mismatch) warning('** for catch stratum ', x, ' some lengths in the length distribution might be of an age not present in the age-length key**')
         }
 
         # 4.3.2) Get age-length key
-        if(n.al==0){
-            if(!mal)warning(paste0('** for catch stratum ', x, ' no age-length key exists**'))
+        if(n.al == 0){
+            if(!mal) warning(paste0('** for catch stratum ', x, ' no age-length key exists**'))
             age.key <- data.frame(length = -1, n.agekey = 0)                # use -1 to indicate problems 
         }else{
             if((n.al < min.al.samples)){
-                warning(paste0('** for catch stratum ', x, ' the inimum number of samples for the age-length key was not reached**'))
+                warning(paste0('** for catch stratum ', x, ' the minimum number of samples for the age-length key was not reached**'))
             }
             age.key <- this.al %>% # age key for this group
-                group_by(length, age) %>% 
-                count() %>%                   # (gavaris:n'ijk )
-                group_by(length) %>% 
-                mutate(prop = n / sum(n),     # (gavaris:p'ijk )
-                       n.al = sum(n)) %>% # (gavaris:n'jk )
-                ungroup() %>% 
-                pivot_wider(id_cols = c("length", "n.al"), names_from = "age", names_prefix = "age.", # put it in a wide format
-                            values_from = "prop", values_fill = 0) %>% 
-                as.data.frame()
+                       group_by(length, age) %>% 
+                       count() %>% # (gavaris:n'ijk )
+                       group_by(length) %>% 
+                       mutate(prop = n / sum(n), # (gavaris:p'ijk )
+                              n.al = sum(n)) %>% # (gavaris:n'jk )
+                       ungroup() %>% 
+                       pivot_wider(id_cols = c("length", "n.al"), names_from = "age", names_prefix = "age.", # put it in a wide format
+                                   values_from = "prop", values_fill = 0) %>% 
+                       as.data.frame()
         }
         
         # 3.4) Bind and fill up the gaps ####
@@ -188,8 +194,8 @@ get.samples <- function(catch, lf, al=NULL, min.al.samples = 2, min.lf.samples =
         cola <- grep('age\\.', names(ret)) # columns with ages
         
         # 3.4.2) Filling the gaps
-        if(length(cola)>0)ret <- fill.multinom(df = ret, acol = cola, lcol = 1, id=x)
-        ret <- ret[!is.na(ret$n.lf),]             # in alk but not lf
+        if (length(cola) > 0) ret <- fill.multinom(df = ret, acol = cola, lcol = 1, id = x)
+        ret <- ret[!is.na(ret$n.lf),] # in alk but not lf
         ret[is.na(ret$n.al), 'n.al'] <- 0 # 0 age key samples, meaning it was imputed
 
         # 3.5) Return it all ####
@@ -250,7 +256,7 @@ find.samples <- function(df,o,y,p,r,g,period.unit){
            '2'  = {id <- with(df, date %in% dn & gear %in% g & region %in% r)},               # year, neighbouring period, region, gear
            '3'  = {id <- with(df, date %in% d  & gear %in% g)},                               # year, period, gear                 
            '4'  = {id <- with(df, date %in% dn & gear %in% g)},                               # year, neighbouring period, gear
-           '5'  = {id <- with(df, date %in% dn)},                                             # year, neighbouring period
+           '5'  = {id <- with(df, year %in% y & gear %in% g)},                                # year, gear
            '6'  = {id <- with(df, year %in% y)},                                              # year
            '7'  = {id <- with(df, year %in% yn & period %in% p  & gear %in% g & region %in% r)},  # neighbouring year, period, gear, region
            '8'  = {id <- with(df, year %in% yn & period %in% pn & gear %in% g & region %in% r)},  # neighbouring year, neigbouring period, gear, region
