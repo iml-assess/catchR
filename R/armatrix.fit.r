@@ -52,20 +52,21 @@ armatrix.fit <- function(year,age,x,cv,shrink.cv=0.5,...){
     
     if(shrink.cv<0 | shrink.cv>1) warning("shrink.cv restricted to 0-1")
     
-    id0 <- cv==0
-    if(any(id0)){
-        if(all(id0)) stop('not all cv should be zero')
-        warning('cvs equal to 0 replaced by value of historic 95% quantile')
-        upper.cv <- tapply(cv[!id0],age[!id0],quantile,prob=0.95)
-        cv[id0] <- upper.cv[age[which(id0)]-min(age)+1]
+    id <- cv==0 | is.na(cv)
+    if(any(id)){
+        if(all(id)) stop('not all cv should be zero or NA')
+        warning('cvs equal to 0/NA replaced by value of historic 95% quantile')
+        upper.cv <- tapply(cv[!id],age[!id],quantile,prob=0.95)
+        cv[id] <- upper.cv[age[which(id)]-min(age)+1]
     }
     
     mean.cv <- tapply(cv[!id0],age[!id0],mean) 
-    input$se <- (1-shrink.cv)*cv + shrink.cv*mean.cv[age-min(age)+1]
+    input$se <- as.vector((1-shrink.cv)*cv + shrink.cv*mean.cv[age-min(age)+1])
     input$x <- log(x)
     
     date <- expand.grid(year=min(year):max(year), age=min(age):max(age))
     datd <- merge(date, input, all.x = TRUE)
+    datd[is.na(datd)] <- NA  # model does not accept NaN
     dat <- as.list(datd[,-4])
     
     para <- list( 
