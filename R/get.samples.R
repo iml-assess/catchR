@@ -7,7 +7,7 @@
 ##' @param min.al.fish Minimum number of fish required for age-length keys. By default = 5
 ##' @param period.unit Whether catch and lf are grouped by "month" (default) or "quarter".
 ##' @param prob.al Maximum likelihood (0-1, default =0.95) allowed for any length of a stratum-specific LF distribution to be of an age not included in the ALK. If it is prob.al likely that an age is missing, the algorithm will continue adding samples.
-##' @param subsample Logical. Only TRUE if ALL fish in the lf data.frame have been aged (perfect correspondance with al). 
+##' @param subsample Logical. TRUE if al is composed of length-stratified subsamples of lf, from which fish were aged.
 ##' @details 
 #' Aimed at splitting catch by length and/or age. If age information is available, this function can be used to subsequently determine 
 #' catch-at-age as well as the corresponding catch weight-at-age and length-frequency distributions.
