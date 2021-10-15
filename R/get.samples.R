@@ -84,10 +84,10 @@ get.samples <- function(catch, lf, al=NULL, min.al.samples = 2, min.lf.samples =
         alg <- prop.table(alg,1)
         alg <- cbind(length=as.numeric(rownames(alg)),data.frame(rbind(alg)))
         
-        le <- expand.grid(length=seq(min(alg$length),max(alg$length),min(diff(alg$length))))
+        le <- expand.grid(length=seq(min(c(alg$length, lf$length)), max(c(alg$length, lf$length)), min(diff(alg$length))))
         alg <- merge(le,alg) # matplot(alg[,-1])
         
-        alg <- fill.multinom(df = alg, acol = 2:ncol(alg), lcol = 1, id='global', zero = TRUE) # matplot(alg[,-1])
+        alg <- fill.multinom(df = alg, acol = 2:ncol(alg), lcol = 1, id='global', smooth = TRUE) # matplot(alg[,-1])
     }else{
         alg <- data.frame(matrix(ncol=1,nrow=0,dimnames = list(NULL,'length')))
     }
@@ -270,7 +270,7 @@ find.samples <- function(df,o,y,p,r,g,period.unit){
 ##' @details Functions that uses the nnet::multinom function to impute age probabilities for lengths that were found in LF samples, but absent of AL samples.
 ##' @importFrom nnet multinom
 ##' @rdname multinom_fill
-fill.multinom <- function(df, acol, lcol, id=NULL, zero=FALSE){
+fill.multinom <- function(df, acol, lcol, id=NULL, smooth=FALSE){
     alen <- as.matrix(df[,acol,drop=FALSE])
     len  <- df[,lcol]
     if(ncol(alen) == 1){ # if there is only one age class than the likelihood is always 1??
@@ -283,17 +283,13 @@ fill.multinom <- function(df, acol, lcol, id=NULL, zero=FALSE){
         new <- round(new, 3) # acceptable precision level (to avoid 0.0000001 % chances of absurd age-length combos)
     }
     
-    # replace NA's by predictions
-    df[, acol][is.na(df[, acol])] <- new[is.na(df[, acol])] 
-    
-    # replace zeros by predictions
-    if(zero){
-        q <- 0.01                 # when a zero should probably be at least 1%
-        id <- new>q & df[,acol]==0 # will replace the zeros in ALK that are most likely not zeros
-        df[,acol][id] <- new[id] 
-        s <- matrix(rowSums(df[,acol]),ncol=length(acol),nrow=nrow(df),byrow = FALSE)
-        df[,acol][!id] <- df[,acol][!id]/s[!id]
+    # replace onle NAs or everything by predictions
+    if(smooth){
+        df[, acol] <- new
+    } else {
+        df[, acol][is.na(df[, acol])] <- new[is.na(df[, acol])]
     }
+    
     return(df)
 }
 
