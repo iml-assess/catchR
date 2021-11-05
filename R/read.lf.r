@@ -2,7 +2,7 @@
 ##' @param file .dat file to read. This file is the output of this SAS program: S:/SAS/Peche/autoexec_peche.sas.
 ##' @param year Vector of years to read (ex: 2015:2020). NULL by default, meaning the function will keep data from all available years.
 ##' @param language Language to use for column names, either "en" (default) or "fr".
-##' @param ... Arguments used with read_fwf() (e.g., progress, skip_empty_rows, n_max).
+##' @param ... Optional arguments used with readr::read_fwf() (e.g., progress, skip_empty_rows, n_max).
 ##' @import readr lubridate
 ##' @details Reads length-frequency data from dockside monitoring. Follows structure of file S:/SAS/Peche/Infile_EntFrq.txt.
 ##' @rdname read.lf
