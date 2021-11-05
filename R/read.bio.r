@@ -9,9 +9,9 @@
 #' Currently only mackerel and Atlantic cod are supported (To add a species: fill in data_raw/bio_key.csv)
 ##' @import lubridate readr
 ##' @export
-read.bio <- function(file, year = NULL, species, language = "en", ...) {
+read.bio <- function(file, year = NULL, sp, language = "en", ...) {
 
-    species <- match.arg(species, choices = c('cod','mackerel'))
+    species <- match.arg(sp, choices = c('cod','mackerel'))
     language <- match.arg(language, choices = c("en", "fr"))
 
     # read in data
