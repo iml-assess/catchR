@@ -2,7 +2,7 @@
 ##' @param sp Numeric species code (ex: 100 for Atlantic cod). Can also be a vector of multiple numeric species codes.
 ##' @param path Directory where files to read are located. Ex: "//dcqcimlna01a/BD_Peches/Ziff/Format CSV/Fichiers de données/".
 ##' @param year Vector of years to read (ex: 2015:2020). NULL by default, meaning the function will keep data from all available years.
-##' @param language Language to use for column names, either "fr" (default) or "en".
+##' @param language Language to use for column names, either "en" (default) or "fr".
 ##' @import readr lubridate
 ##' @importFrom  data.table rbindlist fread
 ##' @details
@@ -16,9 +16,9 @@
 #' }
 ##' @rdname read.ziff
 ##' @export
-read.ziff <- function(sp, path, year = NULL, language = c("fr", "en")){
+read.ziff <- function(sp, path, year = NULL, language = "en"){
 
-   language <- match.arg(language)
+   language <- match.arg(language, choices = c("en", "fr"))
 
    # 1) Files to read
    files <- list.files(pattern = "^Version_totale_", full.names = TRUE, ignore.case = TRUE, path = path)
