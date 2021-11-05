@@ -3,7 +3,7 @@
 ##' @param year Vector of years to read (ex: 2015:2020). NULL by default, meaning the function will keep data from all available years.
 ##' @param species Either "cod" or "mackerel".
 ##' @param language Language to use for column names, either "en" (default) or "fr".
-##' @param ... Arguments used with read_fwf() (e.g., progress, skip_empty_rows, n_max).
+##' @param ... Optional arguments used with readr::read_fwf() (e.g., progress, skip_empty_rows, n_max).
 ##' @details 
 #' Read biological data from dockside monitoring. 
 #' Currently only mackerel and Atlantic cod are supported (To add a species: fill in data_raw/bio_key.csv)
