@@ -6,7 +6,7 @@
 ##' @param min.lf.samples Minimum number of samples required for length frequencies. By default = 2.
 ##' @param min.al.fish Minimum number of fish required for age-length keys. By default = 5
 ##' @param period.unit Whether catch and lf are grouped by "month" (default) or "quarter".
-##' @param prob.al Maximum likelihood (0-1, default =0.95) allowed for any length of a stratum-specific LF distribution to be of an age not included in the ALK. If it is prob.al likely that an age is missing, the algorithm will continue adding samples.
+##' @param prob.al Maximum probability (0-1, default =0.95) allowed for any length of a stratum-specific LF distribution to be of an age not included in the ALK. If it is prob.al likely that an age is missing, the algorithm will continue adding samples.
 ##' @param subsample Logical. TRUE if al is composed of length-stratified subsamples of lf, from which fish were aged.
 ##' @details 
 #' Aimed at splitting catch by length and/or age. If age information is available, this function can be used to subsequently determine 
@@ -27,7 +27,7 @@
 #' For the age-length-keys, the following criteria can be used to determine a representative amount of samples has been found:
 #' I. minimum number of samples (min.al.samples).
 #' II. minimum number of fish (min.al.fish), so that small or incomplete age key samples can still be used if present.
-#' III. Maximum likelihood (0-1, default =0.95) allowed for any length of a stratum-specific LF distribution to be of an age not included in the ALK (prob.al). This can be used to ensure that the ALK matches sufficiently with the LF results.
+#' III. Maximum probability (0-1, default =0.95) allowed for any length of a stratum-specific LF distribution to be of an age not included in the ALK (prob.al). This can be used to ensure that the ALK matches sufficiently with the LF results.
 #' 
 #' Regions of the catch (e.g., 3P) can be broader then the sample regions (e.g., 3Pn). Sample regions containing the catch region (such as the 3Pn example) will all be used.
 #' When catch in a certain year is not attributed to a certain region, gear or period, that factor is ignored (e.g., catch with no gear will have samples that could be from any gear)
