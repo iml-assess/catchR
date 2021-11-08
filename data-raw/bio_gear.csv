@@ -1,48 +1,48 @@
 engin_fr,engin_en,gear.cat,code_nr
-Pièges aériens,Aerial traps,FAR,08.6.0
-Eperviers,Cast nets,FCN,06.1.0
-Autres engins retombants (non spécifiés),Falling gear (not specified),FG,06.9.0
-Pièges (non spécifiés),Traps (not specified),FIX,08.9.0
-Filets-pièges fixes non couverts,Stationary uncovered pound nets,FPN,08.1.0
+PiÃ¨ges aÃ©riens,Aerial traps,FAR,08.6.0
+Ã‰perviers,Cast nets,FCN,06.1.0
+Autres engins retombants (non spÃ©cifiÃ©s),Falling gear (not specified),FG,06.9.0
+PiÃ¨ges (non spÃ©cifiÃ©s),Traps (not specified),FIX,08.9.0
+Filets-piÃ¨ges fixes non couverts,Stationary uncovered pound nets,FPN,08.1.0
 Nasses (casiers),Pots,FPO,08.2.0
-Filets à l'étalage (diables),Stow nets,FSN,08.4.0
+Filets Ã  l'Ã©talage (diables),Stow nets,FSN,08.4.0
 Barrages/parcs/bordigues/etc.,Barriers/fences/weirs/etc.,FWR,08.5.0
 Verveux,Fyke nets,FYK,08.3.0
-Filets maillants et filets emmêlants (non spécifiés),Gillnets and entangling nets (not specified),GEN,07.9.0
-Filets maillants (non spécifiés),Gillnets (not specified),GN,07.9.1
+Filets maillants et filets emmÃªlants (non spÃ©cifiÃ©s),Gillnets and entangling nets (not specified),GEN,07.9.0
+Filets maillants (non spÃ©cifiÃ©s),Gillnets (not specified),GN,07.9.1
 Filets maillants encerclants,Encircling gillnets,GNC,07.3.0
-Filets maillants dérivants (filets dérivants),Driftnets,GND,07.2.0
+Filets maillants dÃ©rivants (filets dÃ©rivants),Driftnets,GND,07.2.0
 Filets maillants fixes (sur perches),Fixed gillnets (on stakes),GNF,07.4.0
-Filets maillants calés (ancrés),Set gillnets (anchored),GNS,07.1.0
-Trémails et filets maillants combinés,Combined gillnets-trammel nets,GTN,07.6.0
-Lignes à main et lignes avec cannes (mécanisées),Handlines and pole-lines (mechanized),LHM,09.2.0
-Lignes à main et lignes à cannes (manoeuvrées à la main),Handlines and pole-lines (hand-operated),LHP,09.1.0
-Palangres (non spécifiées),Longlines (not specified),LL,09.5.0
-Palangres dérivantes,Drifting longlines,LLD,09.4.0
-Palangres calées,Set longlines,LLS,09.3.0
-Filets soulevés (non spécifiés),Lift nets (not specified),LN,05.9.0
-Filets soulevés manoeuvrés du bateau,Boat-operated lift nets,LNB,05.2.0
-Filets soulevés portatifs,Portable lift nets,LNP,05.1.0
-Filets soulevés fixes manoeuvrés du rivage,Shore-operated stationary lift nets,LNS,05.3.0
-Lignes de traîne,Trolling lines,LTL,09.6.0
-Hameçons et lignes (non spécifiés),Hooks and lines (not specified),LX,09.9.0
+Filets maillants calÃ©s (ancrÃ©s),Set gillnets (anchored),GNS,07.1.0
+TrÃ©mails et filets maillants combinÃ©s,Combined gillnets-trammel nets,GTN,07.6.0
+Lignes Ã  main et lignes avec cannes (mÃ©canisÃ©es),Handlines and pole-lines (mechanized),LHM,09.2.0
+Lignes Ã  main et lignes Ã  cannes (manoeuvrÃ©es Ã  la main),Handlines and pole-lines (hand-operated),LHP,09.1.0
+Palangres (non spÃ©cifiÃ©es),Longlines (not specified),LL,09.5.0
+Palangres dÃ©rivantes,Drifting longlines,LLD,09.4.0
+Palangres calÃ©es,Set longlines,LLS,09.3.0
+Filets soulevÃ©s (non spÃ©cifiÃ©s),Lift nets (not specified),LN,05.9.0
+Filets soulevÃ©s manoeuvrÃ©s du bateau,Boat-operated lift nets,LNB,05.2.0
+Filets soulevÃ©s portatifs,Portable lift nets,LNP,05.1.0
+Filets soulevÃ©s fixes manoeuvrÃ©s du rivage,Shore-operated stationary lift nets,LNS,05.3.0
+Lignes de traÃ®ne,Trolling lines,LTL,09.6.0
+HameÃ§ons et lignes (non spÃ©cifiÃ©s),Hooks and lines (not specified),LX,09.9.0
 Seine bourse,Purse seine,PS,
 Lampara,Lampara,LA,
-Engin non spécifié,Unspecified fixed gear,MIS,
-Engin non spécifié,Unspecified fixed gear,NK,
-Chalut de fond à panneaux ,Bottom otter trawl,OTB,
-Chalut pélagique,Midwater trawl,OTM,
+Engin non spÃ©cifiÃ©,Unspecified fixed gear,MIS,
+Engin non spÃ©cifiÃ©,Unspecified fixed gear,NK,
+Chalut de fond Ã  panneaux ,Bottom otter trawl,OTB,
+Chalut pÃ©lagique,Midwater trawl,OTM,
 Seine de plage,Beach and bar or tuck seine,SB,
-Danois/Ecossais/seine Pairée (2 navires),Danish/Scottish/Pair seine (2 boats),SDN,
+Seine danoise, Ã©cossaise ou pairÃ©e (2 navires),Danish, Scottish or Pair seine (2 boats),SDN,
 Seine coulissante (boeuf),Pair seine,SPR,
-Chalut à crevettes (arrière) sans grille,Shrimp trawl (stern),ST2,
+Chalut Ã  crevettes (arriÃ¨re) sans grille,Shrimp trawl (stern),ST2,
 TS,TS,TS,
 TXS,TXS,TXS,
-Chalut de fond à panneaux (arrière),Stern otter trawls,OTB2,
-Chalut à crevettes (non spécifié) sans grille,Shrimp trawl (unspecified) without grid,ST,
-Chalut de fond à panneaux (de côté),Side otter trawls,OTB1,
-Seine écossaise,Scottish seine,SSC,
+Chalut de fond Ã  panneaux (arriÃ¨re),Stern otter trawls,OTB2,
+Chalut Ã  crevettes (non spÃ©cifiÃ©) sans grille,Shrimp trawl (unspecified) without grid,ST,
+Chalut de fond Ã  panneaux (de cÃ´tÃ©),Side otter trawls,OTB1,
+Seine Ã©cossaise,Scottish seine,SSC,
 Palangrotte,Handline,LLG,
-Ligne à main (non spécifié),Handline (unspecified),LMP,
-Chalut à crevettes (de côté) sans grille,Shrimp trawl (side),ST1,
-Chalut pélagique à panneaux (arrière),Midwater otter trawl (stern),OTM2,
+Ligne Ã  main (non spÃ©cifiÃ©),Handline (unspecified),LMP,
+Chalut Ã  crevettes (de cÃ´tÃ©) sans grille,Shrimp trawl (side),ST1,
+Chalut pÃ©lagique Ã  panneaux (arriÃ¨re),Midwater otter trawl (stern),OTM2,
