@@ -8,7 +8,7 @@ armatrix.predobs(
   x,
   xlab = "Year",
   ylab = "Age",
-  title = "Standardized residuals",
+  title = "Predicted vs Observed",
   ...
 )
 }

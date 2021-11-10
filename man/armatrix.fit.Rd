@@ -50,5 +50,5 @@ Developed by Noel Cadigan.
 d <- expand.grid(year=2001:2010,age=1:10)
 d$x <- exp(log(d$age)+rnorm(nrow(d),1,0.1))
 d$cv <- d$x/10
-fit <- do.call(armatrix,as.list(d))
+fit <- do.call(armatrix.fit,as.list(d))
 }

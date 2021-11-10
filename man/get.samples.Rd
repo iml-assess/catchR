@@ -2,33 +2,62 @@
 % Please edit documentation in R/get.samples.R
 \name{get.samples}
 \alias{get.samples}
-\title{Return length frequencies and age-length keys corresponding to the catch from a period, gear and region to use in catch-at-age calculations}
+\title{For each catch stratum, attach corresponding length-frequency and/or age-length keys}
 \usage{
 get.samples(
   catch,
   lf,
-  al,
-  tresh.al = 2,
-  tresh.lf = 2,
-  period.unit = c("month", "quarter")
+  al = NULL,
+  min.al.samples = 2,
+  min.lf.samples = 2,
+  min.al.fish = 5,
+  period.unit = c("month", "quarter"),
+  prob.al = 0.95,
+  subsample = TRUE
 )
 }
 \arguments{
-\item{catch}{Data.frame with these columns: year, period, region, gear, catch.}
+\item{catch}{Data.frame with numeric columns year, period, region, gear, catch.}
 
-\item{lf}{Data.frame with these columns: year, period, region, gear, length, weight.unit, n, sample.id.}
+\item{lf}{Data.frame with numeric columns year, period, region, gear, length, weight.unit, n, sample.id.}
 
-\item{al}{Data.frame with these columns: year, period, region, gear, length, age, sample.id.}
+\item{al}{Data.frame with numeric columns year, period, region, gear, length, age, sample.id.}
 
-\item{tresh.al}{Threshold of minimum number of samples required for length frequencies. By default = 2.}
+\item{min.al.samples}{Minimum number of samples required for age-length keys. By default = 2.}
+
+\item{min.lf.samples}{Minimum number of samples required for length frequencies. By default = 2.}
+
+\item{min.al.fish}{Minimum number of fish required for age-length keys. By default = 5}
 
 \item{period.unit}{Whether catch and lf are grouped by "month" (default) or "quarter".}
+
+\item{prob.al}{Maximum probability (0-1, default =0.95) allowed for any length of a stratum-specific LF distribution to be of an age not included in the ALK. If it is prob.al likely that an age is missing, the algorithm will continue adding samples.}
+
+\item{subsample}{Logical. TRUE if al is composed of length-stratified subsamples of lf, from which fish were aged.}
 }
 \description{
-Return length frequencies and age-length keys corresponding to the catch from a period, gear and region to use in catch-at-age calculations
+For each catch stratum, attach corresponding length-frequency and/or age-length keys
 }
 \details{
-Attributes length-frequencies and age-length keys to a catch level based on a 12 step approach (see steps below). Used to calculate catch-at-age, weight-at-age and length-frequency distributions.
+Aimed at splitting catch by length and/or age. If age information is available, this function can be used to subsequently determine 
+catch-at-age as well as the corresponding catch weight-at-age and length-frequency distributions.
+
+Three possibilities of data-availability are supported:
+I. only length-frequency samples (lf, al=NULL and no age composition can be computed).
+II. Length-frequency samples (lf) with length-stratified subsamples that were aged (al). subsample=TRUE
+III. Length-frequency samples (lf) for which ALL fish were ALWAYS aged (i.e., cbind(lf,al) would give the original database) subsample=FALSE
+
+Details on the algorithm with which samples are attributed to catch strata:
+
+Attribution of length-frequencies and age-length keys to a catch stratum are based on a 12 step approach (see steps below). 
+
+For the length-frequencies, the following criteria can be used to determine a representative amount of samples has been found:
+I. minimum number of samples (min.lf.samples).
+
+For the age-length-keys, the following criteria can be used to determine a representative amount of samples has been found:
+I. minimum number of samples (min.al.samples).
+II. minimum number of fish (min.al.fish), so that small or incomplete age key samples can still be used if present.
+III. Maximum probability (0-1, default =0.95) allowed for any length of a stratum-specific LF distribution to be of an age not included in the ALK (prob.al). This can be used to ensure that the ALK matches sufficiently with the LF results.
 
 Regions of the catch (e.g., 3P) can be broader then the sample regions (e.g., 3Pn). Sample regions containing the catch region (such as the 3Pn example) will all be used.
 When catch in a certain year is not attributed to a certain region, gear or period, that factor is ignored (e.g., catch with no gear will have samples that could be from any gear)

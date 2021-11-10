@@ -4,28 +4,22 @@
 \alias{find.samples}
 \title{Find samples}
 \usage{
-find.samples(df, o, d, dn, g, r, y, yn, p, pn)
+find.samples(df, o, y, p, r, g, period.unit)
 }
 \arguments{
-\item{df}{Data.frame in which to find sample.}
+\item{df}{Data.frame in which to find sample}
 
-\item{o}{Option for searching.}
+\item{o}{Option for searching}
 
-\item{d}{Date.}
+\item{y}{Year}
 
-\item{g}{Gear.}
+\item{p}{Period}
 
-\item{r}{Region.}
+\item{r}{Region}
 
-\item{y}{Year.}
+\item{g}{Gear}
 
-\item{yn}{Neighbouring years.}
-
-\item{p}{Period.}
-
-\item{pn}{Neighbouring periods.}
-
-\item{nd}{Neighbouring dates.}
+\item{period.unit}{Whether catch and lf are grouped by "month" (default) or "quarter"}
 }
 \description{
 Find samples

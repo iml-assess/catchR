@@ -4,7 +4,7 @@
 \alias{read.ziff}
 \title{read ZIFF files}
 \usage{
-read.ziff(sp, path, year = NULL, language = c("fr", "en"))
+read.ziff(sp, path, year = NULL, language = "en")
 }
 \arguments{
 \item{sp}{Numeric species code (ex: 100 for Atlantic cod). Can also be a vector of multiple numeric species codes.}
@@ -13,7 +13,7 @@ read.ziff(sp, path, year = NULL, language = c("fr", "en"))
 
 \item{year}{Vector of years to read (ex: 2015:2020). NULL by default, meaning the function will keep data from all available years.}
 
-\item{language}{Language to use for column names, either "fr" (default) or "en".}
+\item{language}{Language to use for column names, either "en" (default) or "fr".}
 }
 \description{
 read ZIFF files
