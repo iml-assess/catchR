@@ -4,18 +4,18 @@
 \alias{read.bio}
 \title{Reads biological data}
 \usage{
-read.bio(file, year = NULL, species, language = "en", ...)
+read.bio(file, year = NULL, sp, language = "en", ...)
 }
 \arguments{
 \item{file}{.dat file to read. This file is the output of this SAS program: S:/SAS/Peche/autoexec_peche.sas.}
 
 \item{year}{Vector of years to read (ex: 2015:2020). NULL by default, meaning the function will keep data from all available years.}
 
-\item{species}{Either "cod" or "mackerel".}
-
 \item{language}{Language to use for column names, either "en" (default) or "fr".}
 
-\item{...}{Arguments used with read_fwf() (e.g., progress, skip_empty_rows, n_max).}
+\item{...}{Optional arguments used with readr::read_fwf() (e.g., progress, skip_empty_rows, n_max).}
+
+\item{species}{Either "cod" or "mackerel".}
 }
 \description{
 Reads biological data

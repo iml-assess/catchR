@@ -13,7 +13,7 @@ read.lf(file, year = NULL, language = "en", ...)
 
 \item{language}{Language to use for column names, either "en" (default) or "fr".}
 
-\item{...}{Arguments used with read_fwf() (e.g., progress, skip_empty_rows, n_max).}
+\item{...}{Optional arguments used with readr::read_fwf() (e.g., progress, skip_empty_rows, n_max).}
 }
 \description{
 Reads length-frequency data from dockside monitoring.

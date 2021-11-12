@@ -4,13 +4,7 @@
 \alias{armatrix.pred}
 \title{Plot predicted armatrix model}
 \usage{
-armatrix.pred(
-  x,
-  xlab = "Year",
-  ylab = "Age",
-  title = "Standardized residuals",
-  ...
-)
+armatrix.pred(x, xlab = "Year", ylab = "Age", title = "Predicted values", ...)
 }
 \arguments{
 \item{x}{object of class armatrix}
