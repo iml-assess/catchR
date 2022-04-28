@@ -82,10 +82,37 @@ read.ziff <- function(sp, path, year = NULL, language = "en"){
    if(language == 'en') colnames(ziff) <- c(ziff_meta_csv$en,'year', 'year.management', 'catch.month', 'land.month', 'month', 
                                             'catch.trim', 'land.trim', 'trim', 'prov.home', 'prov.land')
 
-   # add info for species, gear types, tonnage class
-   ziff <- merge(ziff, ziff_species, by.x = ziff_meta_csv[ziff_meta_csv$fr == 'cod_esp', language], by.y = 'cod_esp', all.x = T)
-   ziff <- merge(ziff, ziff_gear, by.x = ziff_meta_csv[ziff_meta_csv$fr == 'engin', language], by.y = 'engin', all.x = T)
-   ziff <- merge(ziff, ziff_tonnage, by.x = ziff_meta_csv[ziff_meta_csv$fr == 'cl_ton', language], by.y = 'cl_ton', all.x = T)
+   # add info for species
+   ## landed species
+   temp <- ziff_species
+   val <- ziff_meta_csv[ziff_meta_csv$fr == 'cod_esp', language]
+   names(temp) <- c(val, paste0(val, "_en"), paste0(val, "_fr"), paste0(val, "_lat"))
+   ziff <- merge(ziff, temp, by = val, all.x = T)
+   
+   ## targeted species
+   temp <- ziff_species
+   val <- ziff_meta_csv[ziff_meta_csv$fr == 'prespvis', language]
+   names(temp) <- c(val, paste0(val, "_en"), paste0(val, "_fr"), paste0(val, "_lat"))
+   ziff <- merge(ziff, temp, by = val, all.x = T)
 
+   ## main species
+   temp <- ziff_species
+   val <- ziff_meta_csv[ziff_meta_csv$fr == 'prespcap', language]
+   names(temp) <- c(val, paste0(val, "_en"), paste0(val, "_fr"), paste0(val, "_lat"))
+   ziff <- merge(ziff, temp, by = val, all.x = T)
+
+   # add info for gear
+   temp <- ziff_gear
+   val <- ziff_meta_csv[ziff_meta_csv$fr == 'engin', language]
+   names(temp) <- c(val, paste0(val, "_fr"), paste0(val, "_en"), paste0(val, "_fixmob"), paste0(val, "_cat"))
+   ziff <- merge(ziff, temp, by = val, all.x = T)
+   
+   # add info for tonnage class
+   temp <- ziff_tonnage
+   val <- ziff_meta_csv[ziff_meta_csv$fr == 'cl_ton', language]
+   names(temp) <- c(val, paste0(val, "_desc"))
+   ziff <- merge(ziff, temp, by = val, all.x = T)
+   rm(temp)
+   
    return(ziff)
 }
