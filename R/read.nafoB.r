@@ -23,11 +23,11 @@ read.nafoB <- function(path, year = NULL, species = NULL, overwrite = FALSE){
     zips <- urls[grep('.zip', urls)] # get all zip files
     
     # year ranges
-    ys <- sapply(zips, function(x){y <- gsub(".*b-(.+).zip", "\\1", x)})
+    ys <- sapply(zips, function(x){y <- gsub(".*b-(.+).zip", "\\1", tolower(x))})
     ys <- cbind(start = sub("(.*)-.*", "\\1", ys), end = sub(".*-(.*)", "\\1", ys))
     n <- nchar(ys)
     ys[n == 2] <- format(as.Date(ys[n == 2], format = "%y"), "%Y")
-    ys <- type.convert(ys)
+    ys <- type.convert(ys,as.is=TRUE)
     ys[ys > 2050] <- ys[ys > 2050] - 100
     
     if(!is.null(year)){
@@ -43,9 +43,10 @@ read.nafoB <- function(path, year = NULL, species = NULL, overwrite = FALSE){
     # get the data
     nafo <- lapply(1:length(zips), function(z){
         zi <- sub(".*/(.*)", "\\1", zips[z])
+        z <<-z
         un <- paste0(path, gsub('.zip','', zi))
         sh <- gsub('.zip', '', zi)
-        if(!dir.exists(un)|overwrite == TRUE){
+        if(!dir.exists(un)|overwrite){
             di <- paste0(path, zi)
             download.file(url = paste0(site, zips[z]), destfile = di)
             unzip(zipfile = di, exdir = un, junkpaths = FALSE)
@@ -53,7 +54,7 @@ read.nafoB <- function(path, year = NULL, species = NULL, overwrite = FALSE){
         }
         
         fi <- list.files(un, full.names = T, recursive = T)
-        ma <- grep('nafo-21b-[0-9]+-[0-9]+/NAFO', fi, value = T)
+        ma <- grep('[0-9]+-[0-9]+.txt', fi, value = T,ignore.case = TRUE)
         main <-fread(ma, data.table = F, stringsAsFactors = F)
         names(main) <- tolower(names(main))
         names(main)[which(names(main) == 'catches')] <- 'month_nk' # some years it is catches. other files use month_nk
@@ -139,6 +140,9 @@ read.nafoB <- function(path, year = NULL, species = NULL, overwrite = FALSE){
     # split country (provinces for Canada)
     nafo$prov <- ifelse(grepl('Canada', nafo$country), gsub('Canada ', '', nafo$country), NA)
     nafo$country <- ifelse(grepl('Canada', nafo$country), 'Canada', nafo$country)
+    
+    # numeric catches
+    nafo$catch <- as.numeric(nafo$catch)
     
     return(nafo)
 }
