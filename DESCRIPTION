@@ -16,5 +16,5 @@ License: GPL-2
 Imports: readr, lubridate, data.table, tidyr
 Encoding: UTF-8
 LazyData: TRUE
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.1
 Depends: TMB, RcppEigen, R (>= 2.10)
