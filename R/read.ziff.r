@@ -11,6 +11,7 @@
 #' Notes:
 #'  \enumerate{
 #'    \item{NAFO Divisions and Subareas all capitalised to ensure consistency with other databases}
+#'    \item{The year value reflects the year when fish were caught (capt), unless this unavailable, in which case the date of landing is used (land)}
 #'    \item{year, trimester and month values are from catch dates. If no catch date is provided, the landing date is used instead.}
 #'    \item{Data can be read in both languages (column names, province names) but catch-at-age functions require the English version.}
 #' }
