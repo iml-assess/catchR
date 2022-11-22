@@ -113,14 +113,15 @@ armatrix.pred <- function(x,xlab='Year',ylab='Age',title='Predicted values',...)
         labs(x=xlab,y=ylab)
 }
 
-##' Plot predicted armatrix model
+##' Plot waa from armatrix model
 ##' @param x object of class armatrix
 ##' @param xlab xlab
 ##' @param ylab ylab
 ##' @param title title
+##' @param col col lab
 ##' @details ...
 ##' @import ggplot2
-##' @rdname armatrix.pred
+##' @rdname armatrix.waa
 ##' @export
 armatrix.waa <- function(x,xlab='Year',ylab='Weight (kg)',title='',col='Age'){
     d <- x$output
