@@ -84,7 +84,7 @@ armatrix.effects <- function(x){
 ##' @export
 armatrix.cvs <- function(x,xlab='Year',ylab='CV',col=c('black','red'),...){
     d <- x$output[,c(1:2,4:5)]
-    names(d)[3:4] <- c('original CV (observed)','shrinked CV (input)')
+    names(d)[3:4] <- c('original CV (observed)','model CV (input)')
     d <- suppressWarnings(melt(d,id.vars = c('year','age'),variable.name = 'CV'))
     
     ggplot(d,aes(x=year,y=value,col=CV,group=CV))+
@@ -112,6 +112,25 @@ armatrix.pred <- function(x,xlab='Year',ylab='Age',title='Predicted values',...)
         ggtitle(title) +
         labs(x=xlab,y=ylab)
 }
+
+##' Plot predicted armatrix model
+##' @param x object of class armatrix
+##' @param xlab xlab
+##' @param ylab ylab
+##' @param title title
+##' @details ...
+##' @import ggplot2
+##' @rdname armatrix.pred
+##' @export
+armatrix.waa <- function(x,xlab='Year',ylab='Weight (kg)',title='',col='Age'){
+    d <- x$output
+    ggplot(d,aes(x=year,y=pred_exp,col=as.factor(age)))+
+        geom_line()+
+        ggtitle(title) +
+        labs(x=xlab,y=ylab,col=col)+
+        scale_x_continuous(expand=c(0,0))
+}
+
   
 ##' Plot residuals armatrix model (dotplots)
 ##' @param x object of class armatrix
@@ -125,8 +144,8 @@ armatrix.res2 <- function(x,ylab='Standardized residuals'){
     d <- x$output
     d$cohort <- with(d,year-age)
     
-    p1 <- ggplot(d,aes(x=year,y=res))+geom_text(aes(label=age),size=2)+geom_hline(yintercept=0,linetype='dashed')+labs(y='',x='Year')
-    p2 <- ggplot(d,aes(x=cohort,y=res))+geom_point(size=1)+geom_hline(yintercept=0,linetype='dashed')+labs(y='',x='Cohort')
+    p1 <- ggplot(d,aes(x=year,y=res))+geom_text(aes(label=age),size=2)+geom_hline(yintercept=0,linetype='dashed')+labs(y='',x='Year')+geom_smooth()
+    p2 <- ggplot(d,aes(x=cohort,y=res))+geom_point(size=1)+geom_hline(yintercept=0,linetype='dashed')+labs(y='',x='Cohort')+geom_smooth()
     p3 <- ggplot(d,aes(x=age,y=res))+geom_point(size=1)+geom_hline(yintercept=0,linetype='dashed')+labs(y='',x='Age')
     p4 <- ggplot(d,aes(x=pred_exp,y=res))+geom_point(size=1)+geom_hline(yintercept=0,linetype='dashed')+labs(y='',x='Predicted')
     

@@ -43,6 +43,8 @@ armatrix.fit <- function(year,age,x,cv,shrink.cv=0.5,...){
     if(missing(age))  stop("argument 'age' is missing, with no default")
     if(missing(x))    stop("argument 'x' is missing, with no default")
     if(missing(cv))   stop("argument 'cv' is missing, with no default")
+    if(any(is.na(age))) stop("no NA allowed in age")
+    if(any(is.na(year))) stop("no NA allowed in year")
     
     input <- data.frame(year=year,age=age,x=x,cv=cv)
     
@@ -60,7 +62,7 @@ armatrix.fit <- function(year,age,x,cv,shrink.cv=0.5,...){
         cv[id] <- upper.cv[age[which(id)]-min(age)+1]
     }
     
-    mean.cv <- tapply(cv[!id0],age[!id0],mean) 
+    mean.cv <- tapply(cv[!id],age[!id],mean) 
     input$se <- as.vector((1-shrink.cv)*cv + shrink.cv*mean.cv[age-min(age)+1])
     input$x <- log(x)
     
