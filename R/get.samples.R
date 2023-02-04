@@ -272,7 +272,7 @@ do.lookup <- function(catch,lf,al,alg,my.levels,period.unit,min.lf.samples,
                      option.lengthfreq = o.lf - 1, # Level of data aggregation used to create the LF key (1-12)
                      option.agelength = o.al - 1) # Level of data aggregation used to create the AL key (1-12)
         
-        setTxtProgressBar(pb, x)
+        if(!parallel)  setTxtProgressBar(pb, x)
         return(ret)
     })
     return(ret)
