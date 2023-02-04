@@ -75,6 +75,8 @@ get.samples <- function(catch, lf, al = NULL, min.al.samples = 2, min.lf.samples
     # 2) Minor calculations and variable creation
     id <- as.factor(apply(lf[,lfcol[1:5]],1,paste,collapse=""))
     lf$prop <- ave(lf$n, id, FUN = function(z) z/sum(z))
+    lf$date <- with(lf, ymd(paste(year, period, '01')))
+    al$date <- with(al, ymd(paste(year, period, '01')))
 
     my.levels <- sapply(c('period', 'region', 'gear'), function(x) sort(unique(c(lf[, x], al[, x])))) # unique levels of each group
     
@@ -108,12 +110,24 @@ get.samples <- function(catch, lf, al = NULL, min.al.samples = 2, min.lf.samples
         if(is.na(g)) g <- my.levels$gear
         if(is.na(r)) r <- my.levels$region else r <- my.levels$region[grepl(r, as.character(my.levels$region), fixed = T)]  # samples from region and subregions
         
+        # Neighbouring dates/months/years 
+        d  <- ymd(paste(y, p, '01')) # date (for semesters this will be month 1 to 4, but that doesn't matter)
+        dn <- d                      # neigbouring dates. If no period data, all periods of the same year are allowed  (so option 1 and 2 are the same)
+        if(length(p)==1){            # If period data; normal way
+            dn <- d %m+% months(c(-1, 0, 1)) # neigbouring dates
+            if(period.unit == 'quarter'){    # cheat and replace december with last quarter
+                month(dn[which(month(dn) == 12)]) <- 4
+            }       
+        }
+        pn <- month(dn)       # neigbouring periods
+        yn <- y + c(-1, 0, 1) # neigbouring years
+        
         # 4.2) LF samples ####
         # 4.2.1) Get samples to be used
         o.lf <- 1 # first option
         n.lf <- 0 # number of samples found
         while(n.lf < min.lf.samples && o.lf <= 12){
-            id <- find.samples(lf,o.lf,y,p,r,g,period.unit) # find samples according to step o
+            id <- find.samples(lf,o.lf,d,dn,g,r,y,yn,p,pn) # find samples according to step o
             this.lf <- lf[id, ] # select them
             n.lf <- nrow(unique(this.lf[,lfcol[1:5]])) # count unique samples 
             o.lf <- o.lf + 1 # go to next step
@@ -145,7 +159,7 @@ get.samples <- function(catch, lf, al = NULL, min.al.samples = 2, min.lf.samples
         mismatch <- FALSE # by default
         if(!mal){
             while(o.al <= 12 && any(min.al.samples >= n.al, !a.al, min.al.fish >= f.al)){ # only continue if steps available AND both quality criteria (number of samples, coverage with LF dist) are met
-                if(subsample | o.al>1) id <- find.samples(al,o.al,y,p,r,g,period.unit) # find samples according to step o, unless no subsample was taken and the ids are the same as for the lf samples
+                if(subsample | o.al>1) id <- find.samples(al,o.al,d,dn,g,r,y,yn,p,pn) # find samples according to step o, unless no subsample was taken and the ids are the same as for the lf samples
                 this.al <- al[id,] # select them
                 n.al <- nrow(unique(this.al[,alcol[1:5]])) # count unique samples
                 f.al <- nrow(this.al) # count fish
@@ -230,27 +244,17 @@ get.samples <- function(catch, lf, al = NULL, min.al.samples = 2, min.lf.samples
 ##' Find samples
 ##' @param df Data.frame in which to find sample
 ##' @param o Option for searching
-##' @param y Year
-##' @param p Period
-##' @param r Region
-##' @param g Gear
-##' @param period.unit Whether catch and lf are grouped by "month" (default) or "quarter"
+##' @param d Date.
+##' @param nd Neighbouring dates.
+##' @param g Gear.
+##' @param r Region.
+##' @param y Year.
+##' @param yn Neighbouring years.
+##' @param p Period.
+##' @param pn Neighbouring periods.
 ##' @details 12 steps to find samples.
 ##' @rdname find.samples
-find.samples <- function(df,o,y,p,r,g,period.unit){
-    df$date <- with(df, ymd(paste(year, period, '01')))
-
-    d  <- ymd(paste(y, p, '01')) # date (for semesters this will be month 1 to 4, but that doesn't matter)
-    dn <- d                      # neigbouring dates. If no period data, all periods of the same year are allowed  (so option 1 and 2 are the same)
-    if(length(p)==1){            # If period data; normal way
-        dn <- d %m+% months(c(-1, 0, 1)) # neigbouring dates
-        if(period.unit == 'quarter'){    # cheat and replace december with last quarter
-            month(dn[which(month(dn) == 12)]) <- 4
-        }       
-    }
-    pn <- month(dn)       # neigbouring periods
-    yn <- y + c(-1, 0, 1) # neigbouring years
-    
+find.samples <- function(df,o,d,dn,g,r,y,yn,p,pn){
     switch(as.character(o), 
            '1'  = {id <- with(df, date %in% d  & gear %in% g & region %in% r)},               # year, period, region, gear
            '2'  = {id <- with(df, date %in% dn & gear %in% g & region %in% r)},               # year, neighbouring period, region, gear
