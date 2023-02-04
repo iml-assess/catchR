@@ -61,11 +61,9 @@ get.samples <- function(catch, lf, al = NULL, min.al.samples = 2, min.lf.samples
     lfcol <- c('year', 'period', 'region', 'gear', 'sample.id', 'length', 'weight.unit', 'n') # required columns in lf
     alcol <- c('year', 'period', 'region', 'gear', 'sample.id', 'length', 'age') # required columns in al
     
-    mal  <- is.null(al) # missing age data
-    
     if(!setequal(names(catch), cacol)) stop(paste0('Colnames of catch need to be: ', paste(cacol, collapse = ', ')))
     if(!setequal(names(lf), lfcol)) stop(paste0('Colnames of lf need to be: ',    paste(lfcol, collapse = ', ')))
-    if(!mal) if(!setequal(names(al), alcol)) stop(paste0('Colnames of al need to be: ',    paste(lfcol, collapse = ', ')))
+    if(!is.null(al)) if(!setequal(names(al), alcol)) stop(paste0('Colnames of al need to be: ',    paste(lfcol, collapse = ', ')))
     if(any(duplicated(catch[, cacol[1:4]]))) stop('Only one catch value per stratum allowed.') # one line per stratum allowed
     
     period.unit <- match.arg(period.unit)
@@ -74,15 +72,15 @@ get.samples <- function(catch, lf, al = NULL, min.al.samples = 2, min.lf.samples
     if(!subsample & min.al.samples > min.lf.samples) warning('min.al.samples>min.lf.samples?')
     
     # 2) Minor calculations and variable creation
-    id <- as.factor(apply(lf[,lfcol[1:5]],1,paste,collapse=""))
+    id <- as.factor(apply(lf[,c('year', 'period', 'region', 'gear', 'sample.id') ],1,paste,collapse=""))
     lf$prop <- ave(lf$n, id, FUN = function(z) z/sum(z))
     lf$date <- with(lf, ymd(paste(year, period, '01')))
-    al$date <- with(al, ymd(paste(year, period, '01')))
+    if(!is.null(al)) al$date <- with(al, ymd(paste(year, period, '01')))
 
     my.levels <- sapply(c('period', 'region', 'gear'), function(x) sort(unique(c(lf[, x], al[, x])))) # unique levels of each group
     
     # 3) Global alk (alg): from all years and all ages available.
-    if(!mal){
+    if(!is.null(al)){
         alg <- table(al$length,al$age)
         alg <- prop.table(alg,1)
         alg <- cbind(length=as.numeric(rownames(alg)),data.frame(rbind(alg)))
@@ -96,21 +94,21 @@ get.samples <- function(catch, lf, al = NULL, min.al.samples = 2, min.lf.samples
     }
     
     # 4) For each line of catch, i.e. for each combination of year-period-region-gear, get lf and al data to use in caa calculations
-    # setup for parallell
     if(parallel){
         ncores <- detectCores()   # how many cores does my laptop have
-        nc <- max(c(1,ncores-1)) # how many cores we'll use (one less than available)
+        nc <- max(c(1,ncores-1))  # how many cores we'll use (one less than available)
         cl <- makeCluster(nc) 
-        clusterExport(cl, varlist=c('alg','my.levels','lf','al','period.unit',
+        clusterExport(cl, varlist=c('lf','al','alg','my.levels','period.unit',
                                     'min.lf.samples','min.al.samples','min.al.fish',
-                                    'lfcol','alcol','cacol',
-                                    'subsample','prob.al'), envir=environment()) # export everything to nodes (could put everything also in do.lookup function..)
+                                    'subsample','prob.al'), envir=environment())               # export everything to cores
         split <- rep(nrow(catch)%/%nc,nc)+c(rep(1,nrow(catch)%%nc),rep(0,nc-nrow(catch)%%7))    # split catch dataframe into roughly equal parts, each to be send to a separate node.
-        ret <- parLapply(cl, group_split(catch,rep(1:nc,split)), function(s)  do.lookup(s,lf,al,alg,my.levels,mal))
+        ret <- parLapply(cl, group_split(catch,rep(1:nc,split)), function(s)  do.lookup(s,lf,al,alg,my.levels,period.unit,min.lf.samples,
+                                                                                        min.al.samples,min.al.fish,subsample,prob.al,parallel=TRUE))
         stopCluster(cl)             #shut it down
         ret <- do.call('c',ret)     # combine output each cluster
     }else{
-        ret <- do.lookup(catch,lf,al,alg,my.levels,mal)
+        ret <- do.lookup(catch,lf,al,alg,my.levels,period.unit,min.lf.samples,
+                         min.al.samples,min.al.fish,subsample,prob.al,parallel=FALSE)
     }
 
     # 5) combine and clean
@@ -122,25 +120,28 @@ get.samples <- function(catch, lf, al = NULL, min.al.samples = 2, min.lf.samples
     ages <- if(length(ages)==0) NULL else paste0("age.", ages)
     
     # reordering of ret
-    ret <- ret[, c("id", cacol[1:5], "length", "n.lf", "lf.prop", "n.lftot", "weight.sample", "weight.sample.tot", "weight.unit",
+    ret <- ret[, c("id",  "year", "period", "region", "gear", "catch", "length", "n.lf", "lf.prop", "n.lftot", "weight.sample", "weight.sample.tot", "weight.unit",
                    "n.al", "n.altot", ages, "nsample.lengthfreq", "nsample.agelength", "option.lengthfreq", "option.agelength")]
     return(ret)
 }
 
-##' do the lookup
-##' @param df Data.frame in which to find sample
-##' @param o Option for searching
-##' @param d Date.
-##' @param nd Neighbouring dates.
-##' @param g Gear.
-##' @param r Region.
-##' @param y Year.
-##' @param yn Neighbouring years.
-##' @param p Period.
-##' @param pn Neighbouring periods.
-##' @details 12 steps to find samples.
-##' @rdname find.samples
-do.lookup <- function(catch,lf,al,alg,my.levels,mal,parallel=FALSE){
+##' do lookup
+##' @param catch catch data.frame
+##' @param lf lf
+##' @param al al
+##' @param alg al global
+##' @param my.levels all levels
+##' @param period.unit month or quater
+##' @param min.lf.sampes
+##' @param min.al.samples
+##' @param min.al.fish
+##' @param subsample
+##' @param prob.al
+##' @param parallel logical
+##' @rdname do.lookup
+##' @details workhorse function. Does the actual attribution of samples.
+do.lookup <- function(catch,lf,al,alg,my.levels,period.unit,min.lf.samples,
+                      min.al.samples,min.al.fish,subsample,prob.al,parallel=FALSE){
     if(!parallel)  pb <- txtProgressBar(min = 0, max = nrow(catch), style = 3) # set the progress bar
     ret <- lapply(1:nrow(catch), function(x){
         # get id and total catch
@@ -175,7 +176,7 @@ do.lookup <- function(catch,lf,al,alg,my.levels,mal,parallel=FALSE){
         while(n.lf < min.lf.samples && o.lf <= 12){
             id <- find.samples(lf,o.lf,d,dn,g,r,y,yn,p,pn) # find samples according to step o
             this.lf <- lf[id, ] # select them
-            n.lf <- nrow(unique(this.lf[,lfcol[1:5]])) # count unique samples 
+            n.lf <- nrow(unique(this.lf[,c('year', 'period', 'region', 'gear', 'sample.id')])) # count unique samples 
             o.lf <- o.lf + 1 # go to next step
         }
         # 4.2.2) Get length frequency distribution
@@ -203,11 +204,11 @@ do.lookup <- function(catch,lf,al,alg,my.levels,mal,parallel=FALSE){
         f.al <- 0 # number of fish found
         a.al <- FALSE # does the ALK match the LF distribution
         mismatch <- FALSE # by default
-        if(!mal){
+        if(!is.null(al)){
             while(o.al <= 12 && any(min.al.samples >= n.al, !a.al, min.al.fish >= f.al)){ # only continue if steps available AND both quality criteria (number of samples, coverage with LF dist) are met
                 if(subsample | o.al>1) id <- find.samples(al,o.al,d,dn,g,r,y,yn,p,pn) # find samples according to step o, unless no subsample was taken and the ids are the same as for the lf samples
                 this.al <- al[id,] # select them
-                n.al <- nrow(unique(this.al[,alcol[1:5]])) # count unique samples
+                n.al <- nrow(unique(this.al[,c('year', 'period', 'region', 'gear', 'sample.id')])) # count unique samples
                 f.al <- nrow(this.al) # count fish
                 if(n.al > 0){
                     le.miss <- lf.key[!lf.key$length %in% this.al$length,1]  # lengths not covered by ALK (missing)
@@ -230,7 +231,7 @@ do.lookup <- function(catch,lf,al,alg,my.levels,mal,parallel=FALSE){
         
         # 4.3.2) Get age-length key
         if(n.al == 0){
-            if(!mal) warning(paste0('** for catch stratum ', x, ' no age-length key exists**'))
+            if(!is.null(al)) warning(paste0('** for catch stratum ', x, ' no age-length key exists**'))
             age.key <- data.frame(length = -1, n.agekey = 0)                # use -1 to indicate problems 
         }else{
             if((n.al < min.al.samples)){
@@ -260,7 +261,7 @@ do.lookup <- function(catch,lf,al,alg,my.levels,mal,parallel=FALSE){
         
         # 3.5) Return it all ####
         ret <- cbind(id = x, 
-                     catch[x, cacol[1:5]][rep(1, nrow(ret)), ],
+                     catch[x,c('year', 'period', 'region', 'gear', 'catch')][rep(1, nrow(ret)), ],
                      ret,
                      n.lftot = sum(lf.key$n.lf), # (gavaris:nk) total number of fish measured for length in that combination of year-period-region-gear
                      n.altot = sum(ret$n.al), # total number of fish used in the ALK after the merge with lf.key (some fish from the age.key could be useless depending of lengths in lf.key)
