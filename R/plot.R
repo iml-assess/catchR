@@ -23,17 +23,18 @@ plotCatch <- function(data,x,y,fill=NULL){
 ##' @export
 plot.attribution <- function(x){
     y <- ddply(x,c('id','year','catch'),summarise,
-                option.lengthfreq=unique(option.lengthfreq),
-                nsample.lengthfreq=unique(nsample.lengthfreq),
-                nfish.lengthfreq=sum(n.lf),
-                option.agelength=unique(option.agelength),
-                nsample.agelength=unique(nsample.agelength),
-                nfish.agekey=sum(n.al))
+                LF.option=unique(option.lengthfreq),
+                LF.nsample=unique(nsample.lengthfreq),
+                LF.nfish=sum(n.lf),
+                ALK.option=unique(option.agelength),
+                ALK.nsample=unique(nsample.agelength),
+                ALK.nfish=sum(n.al))
     y <- reshape2::melt(y,id=c('id','year','catch'))
-    ggplot(y,aes(x=value,fill=catch))+
+    ggplot(y,aes(x=value))+
         geom_histogram(bins=30,)+
         facet_wrap(~variable,scale='free')+
-        labs(y='Count',x='Value')
+        labs(y='Count',x='Value')+
+        scale_y_continuous(expand=c(0,0))
     
 }
 
