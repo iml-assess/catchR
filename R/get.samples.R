@@ -8,6 +8,7 @@
 ##' @param period.unit Whether catch and lf are grouped by "month" (default) or "quarter".
 ##' @param prob.al Maximum probability (0-1, default =0.95) allowed for any length of a stratum-specific LF distribution to be of an age not included in the ALK. If it is prob.al likely that an age is missing, the algorithm will continue adding samples.
 ##' @param subsample Logical. TRUE if al is composed of length-stratified subsamples of lf, from which fish were aged.
+##' @param parallel Logical.
 ##' @details 
 #' Aimed at splitting catch by length and/or age. If age information is available, this function can be used to subsequently determine 
 #' catch-at-age as well as the corresponding catch weight-at-age and length-frequency distributions.
@@ -48,12 +49,12 @@
 #'  \item neighbouring year, gear
 #'  \item neighbouring year
 #' }
-##' @import dplyr lubridate tidyr
+##' @import dplyr lubridate tidyr parallel
 ##' @importFrom data.table rbindlist
 ##' @rdname get.samples
 ##' @export
 get.samples <- function(catch, lf, al = NULL, min.al.samples = 2, min.lf.samples = 2, min.al.fish = 5, 
-                        period.unit = c('month', 'quarter'), prob.al = 0.95, subsample = TRUE){
+                        period.unit = c('month', 'quarter'), prob.al = 0.95, subsample = TRUE, parallel=FALSE){
     
     # 1) Validation of the arguments
     cacol <- c('year', 'period', 'region', 'gear', 'catch') # required columns in catch
@@ -93,9 +94,54 @@ get.samples <- function(catch, lf, al = NULL, min.al.samples = 2, min.lf.samples
     }else{
         alg <- data.frame(matrix(ncol=1,nrow=0,dimnames = list(NULL,'length')))
     }
-
+    
     # 4) For each line of catch, i.e. for each combination of year-period-region-gear, get lf and al data to use in caa calculations
-    pb <- txtProgressBar(min = 0, max = nrow(catch), style = 3) # set the progress bar
+    # setup for parallell
+    if(parallel){
+        ncores <- detectCores()   # how many cores does my laptop have
+        nc <- max(c(1,ncores-1)) # how many cores we'll use (one less than available)
+        cl <- makeCluster(nc) 
+        clusterExport(cl, varlist=c('alg','my.levels','lf','al','period.unit',
+                                    'min.lf.samples','min.al.samples','min.al.fish',
+                                    'lfcol','alcol','cacol',
+                                    'subsample','prob.al'), envir=environment()) # export everything to nodes (could put everything also in do.lookup function..)
+        split <- rep(nrow(catch)%/%nc,nc)+c(rep(1,nrow(catch)%%nc),rep(0,nc-nrow(catch)%%7))    # split catch dataframe into roughly equal parts, each to be send to a separate node.
+        ret <- parLapply(cl, group_split(catch,rep(1:nc,split)), function(s)  do.lookup(s,lf,al,alg,my.levels,mal))
+        stopCluster(cl)             #shut it down
+        ret <- do.call('c',ret)     # combine output each cluster
+    }else{
+        ret <- do.lookup(catch,lf,al,alg,my.levels,mal)
+    }
+
+    # 5) combine and clean
+    ret <- rbindlist(ret, fill = TRUE) # automatically fills missing ages for certain grouping      
+    ret <- as.data.frame(ret)
+    cola <- grep('age\\.', names(ret))
+    ret[cola][is.na(ret[cola])] <- 0 # some ages can be missing for a certain catch. They are set to 0
+    ages <- sort(as.numeric(gsub("age\\.", "", names(ret)[cola]))) # sorted age columns
+    ages <- if(length(ages)==0) NULL else paste0("age.", ages)
+    
+    # reordering of ret
+    ret <- ret[, c("id", cacol[1:5], "length", "n.lf", "lf.prop", "n.lftot", "weight.sample", "weight.sample.tot", "weight.unit",
+                   "n.al", "n.altot", ages, "nsample.lengthfreq", "nsample.agelength", "option.lengthfreq", "option.agelength")]
+    return(ret)
+}
+
+##' do the lookup
+##' @param df Data.frame in which to find sample
+##' @param o Option for searching
+##' @param d Date.
+##' @param nd Neighbouring dates.
+##' @param g Gear.
+##' @param r Region.
+##' @param y Year.
+##' @param yn Neighbouring years.
+##' @param p Period.
+##' @param pn Neighbouring periods.
+##' @details 12 steps to find samples.
+##' @rdname find.samples
+do.lookup <- function(catch,lf,al,alg,my.levels,mal,parallel=FALSE){
+    if(!parallel)  pb <- txtProgressBar(min = 0, max = nrow(catch), style = 3) # set the progress bar
     ret <- lapply(1:nrow(catch), function(x){
         # get id and total catch
         C <- catch[x, 'catch']
@@ -141,13 +187,13 @@ get.samples <- function(catch, lf, al = NULL, min.al.samples = 2, min.lf.samples
                 warning(paste0('** for catch stratum ', x, ' the minimum number of samples for the length-frequency distribution was not reached**'))
             }
             lf.key <- this.lf %>%
-                      group_by(length) %>% 
-                      summarise(n.lf = sum(n), # (gavaris:njk)
-                                lf.prop = sum(prop) / sum(this.lf$prop), # (gavaris:pjk ) ALL SAMPLES HAVE EQUAL WEIGHT (n.lf/sum(n/lf) would give more weight to samples with more fish)
-                                weight.sample = sum(weight.unit*n), # (gavaris:wjk )
-                                weight.unit = mean(weight.unit)) %>%  # (gavaris:wbarjk: he doesn't calculate this becauase he always goes for 'aggregated average fish weight ')
-                      filter(n.lf > 0) %>%  # lines where n.lf = 0 are impossible. If present, remove
-                      as.data.frame()
+                group_by(length) %>% 
+                summarise(n.lf = sum(n), # (gavaris:njk)
+                          lf.prop = sum(prop) / sum(this.lf$prop), # (gavaris:pjk ) ALL SAMPLES HAVE EQUAL WEIGHT (n.lf/sum(n/lf) would give more weight to samples with more fish)
+                          weight.sample = sum(weight.unit*n), # (gavaris:wjk )
+                          weight.unit = mean(weight.unit)) %>%  # (gavaris:wbarjk: he doesn't calculate this becauase he always goes for 'aggregated average fish weight ')
+                filter(n.lf > 0) %>%  # lines where n.lf = 0 are impossible. If present, remove
+                as.data.frame()
         }
         
         # 4.3) ALK samples ####
@@ -181,7 +227,7 @@ get.samples <- function(catch, lf, al = NULL, min.al.samples = 2, min.lf.samples
             }
             if(mismatch) warning('** for catch stratum ', x, ' some lengths in the length distribution might be of an age not present in the age-length key**')
         }
-
+        
         # 4.3.2) Get age-length key
         if(n.al == 0){
             if(!mal) warning(paste0('** for catch stratum ', x, ' no age-length key exists**'))
@@ -191,15 +237,15 @@ get.samples <- function(catch, lf, al = NULL, min.al.samples = 2, min.lf.samples
                 warning(paste0('** for catch stratum ', x, ' the minimum number of samples for the age-length key was not reached**'))
             }
             age.key <- this.al %>% # age key for this group
-                       group_by(length, age) %>% 
-                       count() %>% # (gavaris:n'ijk )
-                       group_by(length) %>% 
-                       mutate(prop = n / sum(n), # (gavaris:p'ijk )
-                              n.al = sum(n)) %>% # (gavaris:n'jk )
-                       ungroup() %>% 
-                       pivot_wider(id_cols = c("length", "n.al"), names_from = "age", names_prefix = "age.", # put it in a wide format
-                                   values_from = "prop", values_fill = 0) %>% 
-                       as.data.frame()
+                group_by(length, age) %>% 
+                count() %>% # (gavaris:n'ijk )
+                group_by(length) %>% 
+                mutate(prop = n / sum(n), # (gavaris:p'ijk )
+                       n.al = sum(n)) %>% # (gavaris:n'jk )
+                ungroup() %>% 
+                pivot_wider(id_cols = c("length", "n.al"), names_from = "age", names_prefix = "age.", # put it in a wide format
+                            values_from = "prop", values_fill = 0) %>% 
+                as.data.frame()
         }
         
         # 3.4) Bind and fill up the gaps ####
@@ -211,7 +257,7 @@ get.samples <- function(catch, lf, al = NULL, min.al.samples = 2, min.lf.samples
         if (length(cola) > 0) ret <- fill.multinom(df = ret, acol = cola, lcol = 1, id = x)
         ret <- ret[!is.na(ret$n.lf),] # in alk but not lf
         ret[is.na(ret$n.al), 'n.al'] <- 0 # 0 age key samples, meaning it was imputed
-
+        
         # 3.5) Return it all ####
         ret <- cbind(id = x, 
                      catch[x, cacol[1:5]][rep(1, nrow(ret)), ],
@@ -228,16 +274,6 @@ get.samples <- function(catch, lf, al = NULL, min.al.samples = 2, min.lf.samples
         setTxtProgressBar(pb, x)
         return(ret)
     })
-    ret <- rbindlist(ret, fill = TRUE) # automatically fills missing ages for certain grouping      
-    ret <- as.data.frame(ret)
-    cola <- grep('age\\.', names(ret))
-    ret[cola][is.na(ret[cola])] <- 0 # some ages can be missing for a certain catch. They are set to 0
-    ages <- sort(as.numeric(gsub("age\\.", "", names(ret)[cola]))) # sorted age columns
-    ages <- if(length(ages)==0) NULL else paste0("age.", ages)
-    
-    # reordering of ret
-    ret <- ret[, c("id", cacol[1:5], "length", "n.lf", "lf.prop", "n.lftot", "weight.sample", "weight.sample.tot", "weight.unit",
-                   "n.al", "n.altot", ages, "nsample.lengthfreq", "nsample.agelength", "option.lengthfreq", "option.agelength")]
     return(ret)
 }
 

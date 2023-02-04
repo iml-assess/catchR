@@ -13,7 +13,8 @@ get.samples(
   min.al.fish = 5,
   period.unit = c("month", "quarter"),
   prob.al = 0.95,
-  subsample = TRUE
+  subsample = TRUE,
+  parallel = FALSE
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ get.samples(
 \item{prob.al}{Maximum probability (0-1, default =0.95) allowed for any length of a stratum-specific LF distribution to be of an age not included in the ALK. If it is prob.al likely that an age is missing, the algorithm will continue adding samples.}
 
 \item{subsample}{Logical. TRUE if al is composed of length-stratified subsamples of lf, from which fish were aged.}
+
+\item{parallel}{Logical.}
 }
 \description{
 For each catch stratum, attach corresponding length-frequency and/or age-length keys
