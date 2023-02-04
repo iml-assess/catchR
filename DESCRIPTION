@@ -1,6 +1,6 @@
 Package: catchR
 Title: Analyse catch data and get catch-at-age matrices
-Version: 0.1.0
+Version: 0.1.1
 Date: 2020-10-21
 Authors@R: c(person("Elisabeth",
                     "Van Beveren",
