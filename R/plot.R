@@ -16,12 +16,12 @@ plotCatch <- function(data,x,y,fill=NULL){
         theme(legend.position = 'top', legend.box="vertical")
 }
 
-##' plot.attribution
+##' plotAttribution
 ##' @param x output of get.samples 
 ##' @import ggplot2 reshape2 dplyr
-##' @rdname plot.attribution
+##' @rdname plotAttribution
 ##' @export
-plot.attribution <- function(x){
+plotAttribution <- function(x){
     y <- ddply(x,c('id','year','catch'),summarise,
                 LF.option=unique(option.lengthfreq),
                 LF.nsample=unique(nsample.lengthfreq),
@@ -38,13 +38,13 @@ plot.attribution <- function(x){
     
 }
 
-##' plot.attribution
+##' plotAttribution
 ##' @param x output of get.samples 
 ##' @param annual logical
 ##' @import ggplot2 reshape2 dplyr
-##' @rdname plot.quality
+##' @rdname plotQuality
 ##' @export
-plot.quality <- function(x,variable=c('option.lengthfreq','option.agelength'),annual=FALSE){
+plotQuality <- function(x,variable=c('option.lengthfreq','option.agelength'),annual=FALSE){
     variable <- match.arg(variable)
     y <- ddply(x,c('year'),transform,catch.prop=catch/sum(catch))
     y$catch.propt <- y$catch.prop/length(unique(y$year))
@@ -71,13 +71,13 @@ plot.quality <- function(x,variable=c('option.lengthfreq','option.agelength'),an
     }
 }
 
-##' plot.total
+##' plotTotal
 ##' @param x output of get.samples
 ##' @param y output of get.caa
 ##' @import ggplot2 dplyr viridis
-##' @rdname plot.total
+##' @rdname plotTotal
 ##' @export
-plot.total <- function(x,y){
+plotTotal <- function(x,y){
     tot <- ddply(unique(x[,c('id','year','catch')]),c('year'),summarise,catch=sum(catch,na.rm=TRUE))
     ggplot(y,aes(x=year))+
         geom_bar(stat='identity',aes(y=caaw,fill=age))+
@@ -88,12 +88,12 @@ plot.total <- function(x,y){
         labs(y='Landings (t)',x='Year',fill='Age')
 }
 
-##' plot.caan
+##' plotCaan
 ##' @param x output of get.caa
 ##' @import ggplot2
-##' @rdname plot.caan
+##' @rdname plotCaan
 ##' @export
-plot.caan <- function(x){
+plotCaan <- function(x){
 ggplot(x,aes(x=year,y=age))+
     geom_point(alpha=0.8,aes(size=caan))+ 
     scale_size(range = c(1,12))+
@@ -101,12 +101,12 @@ ggplot(x,aes(x=year,y=age))+
     labs(x='Year',y='Age',size='Numbers')
 }
 
-##' plot.caaw
+##' plotCaaw
 ##' @param x output of get.caa
 ##' @import ggplot2
-##' @rdname plot.caaw
+##' @rdname plotCaaw
 ##' @export
-plot.caaw <- function(x){
+plotCaaw <- function(x){
     ggplot(x,aes(x=year,y=age))+
         geom_point(alpha=0.8,aes(size=caaw))+
         scale_size(range = c(1,12))+
@@ -114,13 +114,13 @@ plot.caaw <- function(x){
         labs(x='Year',y='Age',size='Weight (t)')
 }
 
-##' plot.waa
+##' plotWaa
 ##' @param x output of get.caa
 ##' @param ci logical (plot with confidence intervals?)
 ##' @import ggplot2
-##' @rdname plot.waa
+##' @rdname plotWaa
 ##' @export
-plot.waa <- function(x,ci=FALSE){
+plotWaa <- function(x,ci=FALSE){
     p <- ggplot(x,aes(x=year,y=waa,group=age))+
         labs(x='Year',y='Weight')+
         scale_x_continuous(expand=c(0,0))
@@ -135,13 +135,13 @@ plot.waa <- function(x,ci=FALSE){
     }
 }
 
-##' plot.laa
+##' plotLaa
 ##' @param x output of get.caa
 ##' @param ci logical (plot with confidence intervals?)
 ##' @import ggplot2
-##' @rdname plot.laa
+##' @rdname plotLaa
 ##' @export
-plot.laa <- function(x,ci=FALSE){
+plotLaa <- function(x,ci=FALSE){
     p <- ggplot(x,aes(x=year,y=laa,group=age))+
         labs(x='Year',y='Length')+
         scale_x_continuous(expand=c(0,0))
