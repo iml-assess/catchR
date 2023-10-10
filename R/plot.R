@@ -34,8 +34,8 @@ plotAttribution <- function(x){
         geom_histogram(bins=30,)+
         facet_wrap(~variable,scale='free')+
         labs(y='Count',x='Value')+
-        scale_y_continuous(expand=c(0,0))
-    
+        scale_y_continuous(expand=c(0,0))+
+        scale_x_continuous(breaks = function(x) unique(floor(pretty(seq(0, (max(x) + 1) * 1.1)))))
 }
 
 ##' plotAttribution
@@ -53,19 +53,19 @@ plotQuality <- function(x,variable=c('option.lengthfreq','option.agelength'),ann
     l <- ifelse(variable=='option.lengthfreq','LF', 'ALK')
     
     if (!annual) {
-        ggplot(y,aes(x=as.factor(y),y=catch.propt))+
+        ggplot(y,aes(x=as.factor(y),y=catch.propt*100))+
             geom_bar(stat='identity')+
             labs(x='Option',y='% Landings',title = l)+
-            scale_y_continuous(expand=c(0,0),limits=c(0,1))
+            scale_y_continuous(expand=c(0,0),limits=c(0,100))
     }else{
         y2 <- ddply(y,c('year','y'),summarise,catch.prop=sum(catch.prop))
         y2 <- ddply(y2,c('year'),transform,score=round(weighted.mean(y,catch.prop),2))
-        ggplot(y2,aes(x=as.factor(y),y=catch.prop))+
+        ggplot(y2,aes(x=as.factor(y),y=catch.prop*100))+
             geom_bar(stat='identity')+
             geom_text(aes(x=Inf,y=Inf,label=score,col=score),hjust=2,vjust=2)+
             facet_wrap(~year)+
             labs(x='Option',y='% Landings',title = l)+
-            scale_y_continuous(expand=c(0,0),limits=c(0,1))+
+            scale_y_continuous(expand=c(0,0),limits=c(0,100))+
             theme(legend.position = 'none')+
             scale_color_gradient(low='green',high='red')
     }
