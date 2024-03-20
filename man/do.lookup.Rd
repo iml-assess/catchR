@@ -32,7 +32,17 @@
 
 \item{period.unit}{month or quater}
 
+\item{min.al.samples}{Minimum number of samples required for age-length keys. By default = 2.}
+
+\item{min.al.fish}{Minimum number of fish required for age-length keys. By default = 5}
+
+\item{subsample}{Logical. TRUE if al is composed of length-stratified subsamples of lf, from which fish were aged.}
+
+\item{prob.al}{aximum probability (0-1, default =0.95) allowed for any length of a stratum-specific LF distribution to be of an age not included in the ALK. If it is prob.al likely that an age is missing, the algorithm will continue adding samples.}
+
 \item{parallel}{logical}
+
+\item{min.lf.sampes}{Minimum number of samples required for length frequencies. By default = 2.}
 }
 \description{
 do lookup

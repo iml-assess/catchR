@@ -132,11 +132,11 @@ get.samples <- function(catch, lf, al = NULL, min.al.samples = 2, min.lf.samples
 ##' @param alg al global
 ##' @param my.levels all levels
 ##' @param period.unit month or quater
-##' @param min.lf.sampes
-##' @param min.al.samples
-##' @param min.al.fish
-##' @param subsample
-##' @param prob.al
+##' @param min.lf.sampes Minimum number of samples required for length frequencies. By default = 2.
+##' @param min.al.samples Minimum number of samples required for age-length keys. By default = 2.
+##' @param min.al.fish Minimum number of fish required for age-length keys. By default = 5
+##' @param subsample Logical. TRUE if al is composed of length-stratified subsamples of lf, from which fish were aged.
+##' @param prob.al aximum probability (0-1, default =0.95) allowed for any length of a stratum-specific LF distribution to be of an age not included in the ALK. If it is prob.al likely that an age is missing, the algorithm will continue adding samples.
 ##' @param parallel logical
 ##' @rdname do.lookup
 ##' @details workhorse function. Does the actual attribution of samples.

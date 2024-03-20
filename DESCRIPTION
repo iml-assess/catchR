@@ -13,8 +13,8 @@ Authors@R: c(person("Elisabeth",
 Description: Reads data for stock assessment, includes functions to get catch- weight and length-at-age. 
 LinkingTo: TMB, RcppEigen
 License: GPL-2
-Imports: readr, lubridate, data.table, tidyr
+Imports: readr, lubridate, data.table, tidyr, dplyr, ggplot2, gridExtra, nnet, reshape2, robustbase, rvest, viridis, xml2
 Encoding: UTF-8
 LazyData: TRUE
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 Depends: TMB, RcppEigen, R (>= 2.10)
