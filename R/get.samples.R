@@ -101,7 +101,7 @@ get.samples <- function(catch, lf, al = NULL, min.al.samples = 2, min.lf.samples
         clusterExport(cl, varlist=c('lf','al','alg','my.levels','period.unit',
                                     'min.lf.samples','min.al.samples','min.al.fish',
                                     'subsample','prob.al'), envir=environment())               # export everything to cores
-        split <- rep(nrow(catch)%/%nc,nc)+c(rep(1,nrow(catch)%%nc),rep(0,nc-nrow(catch)%%7))    # split catch dataframe into roughly equal parts, each to be send to a separate node.
+        split <- rep(nrow(catch)%/%nc,nc)+c(rep(1,nrow(catch)%%nc),rep(0,nc-nrow(catch)%%nc))    # split catch dataframe into roughly equal parts, each to be send to a separate node.
         ret <- parLapply(cl, group_split(catch,rep(1:nc,split)), function(s)  do.lookup(s,lf,al,alg,my.levels,period.unit,min.lf.samples,
                                                                                         min.al.samples,min.al.fish,subsample,prob.al,parallel=TRUE))
         stopCluster(cl)             #shut it down
