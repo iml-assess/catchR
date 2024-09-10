@@ -21,6 +21,7 @@ read.nafoB <- function(path, year = NULL, species = NULL, overwrite = FALSE){
     links <- html_nodes(page, 'a') # find all links
     urls <- html_attr(links, 'href') # get the urls
     zips <- urls[grep('.zip', urls)] # get all zip files
+    zips <- sub("\\?.*", "", zips) # remove text after zip (version)
     
     # year ranges
     ys <- sapply(zips, function(x){y <- gsub(".*b-(.+).zip", "\\1", tolower(x))})
@@ -42,8 +43,8 @@ read.nafoB <- function(path, year = NULL, species = NULL, overwrite = FALSE){
 
     # get the data
     nafo <- lapply(1:length(zips), function(z){
+        print(unname(ys[z,]))
         zi <- sub(".*/(.*)", "\\1", zips[z])
-        z <<-z
         un <- paste0(path, gsub('.zip','', zi))
         sh <- gsub('.zip', '', zi)
         if(!dir.exists(un)|overwrite){
@@ -100,27 +101,33 @@ read.nafoB <- function(path, year = NULL, species = NULL, overwrite = FALSE){
         divisions <- fread(input = div, data.table = F, stringsAsFactors = F)
         names(divisions) <- c('div.code', 'nafo')
         
-        # species code
+        # species code (NAFO uses 3 different file formats...)
         sp <- grep('/spe', fi, value = T)
-        spt <- read_lines(sp) 
-        spnotab <- gsub('\t', "  ", spt) # replace tabs by spaces
-        if(substr(spt[1], 1, 4) != 'Code'){
-            spl <- lapply(spnotab[-c(1:6)], function(x){ # split colun based on spaces or fixed interval width
-                sep <- unlist(strsplit(x, "  +"))
-                if(length(sep) == 5) sep <- c(sep[1:2], substr(sep[3], 1, 25), substr(sep[3], 26, nchar(sep[3])), sep[4:5])
-                return(sep)
-            })
-            species <- data.frame(matrix(unlist(spl), nrow = length(spl), byrow = T))
-        }else{
-            spl <- lapply(spnotab[-c(1:4)],function(x){ # split colun based on spaces or fixed interval width
-                sep <- unlist(strsplit(x, "  +"))
-                if(length(sep) == 6) sep <- c(sep[1:2], substr(sep[3], 1, 25), substr(sep[3], 26, nchar(sep[3])), sep[4:6])
-                return(sep)
-            })
-            species <- data.frame(matrix(unlist(spl), nrow = length(spl), byrow = T))[, -7]
+        
+        species <- suppressWarnings(try(read.table(sp,skip = 3,sep=","), silent = TRUE)) # comma seperated file
+        if(ncol(species)==1){ # if weird tab delimited file that can't be read by read.table
+            spt <- read_lines(sp)
+            spnotab <- gsub('\t', "  ", spt) # replace type 1 tabs by type 2 tabs for consistency across file
+            if(substr(spt[1], 1, 4) != 'Code'){ # file type early years
+                spl <- lapply(spnotab[-c(1:6)], function(x){ # split colun based on spaces or fixed interval width
+                    sep <- unlist(strsplit(x, "  +"))
+                    if(length(sep) == 5) sep <- c(sep[1:2], substr(sep[3], 1, 25), substr(sep[3], 26, nchar(sep[3])), sep[4:5])
+                    return(sep)
+                })
+                species <- data.frame(matrix(unlist(spl), nrow = length(spl), byrow = T))
+            }else{ # file type later years
+                spl <- lapply(spnotab[-c(1:4)],function(x){ # split colun based on spaces or fixed interval width
+                    sep <- unlist(strsplit(x, "  +"))
+                    if(length(sep) == 6) sep <- c(sep[1:2], substr(sep[3], 1, 25), substr(sep[3], 26, nchar(sep[3])), sep[4:6])
+                    return(sep)
+                })
+                species <- data.frame(matrix(unlist(spl), nrow = length(spl), byrow = T))[, -7]
+            }
+            species <- as.data.frame(do.call(rbind, spl))
         }
         names(species) <- c('code', 'species.name', 'species.common', 'species.lat', 'species.abbr', 'species.class')
-        
+        species$code <- as.integer(species$code)
+
         # add NAFOB specific meta data 
         Reduce(function(...) mergeif(...), list(main, gear, mainsp, divisions, species))
     })
