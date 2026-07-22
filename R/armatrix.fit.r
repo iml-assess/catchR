@@ -75,7 +75,7 @@ armatrix.fit <- function(year,age,x,cv,shrink.cv=0.5,...){
         age_eff=tapply(dat$x,dat$age,mean,na.rm=T),
         year_eff = rep(0,length(unique(dat$year))),       
         cohort_eff = rep(0,length(unique(dat$year-dat$age))),
-        log_std=rep(log(0.1),3),                 
+        log_std=rep(log(5),3),                 
         logit_rho=rep(0,4),      
         dev=matrix(0,nrow=length(unique(dat$year)),ncol=length(unique(dat$age)),byrow=T)
     )  
@@ -88,7 +88,7 @@ armatrix.fit <- function(year,age,x,cv,shrink.cv=0.5,...){
     
     para.U <- list(
         age_eff=rep(Inf,length(para$age_eff)),
-        log_std=rep(2,3),                 
+        log_std=rep(10,3),                 
         logit_ar=rep(10,4)  
     )
     

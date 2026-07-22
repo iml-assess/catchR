@@ -26,3 +26,15 @@ To get catch-, weight- and length at age, the following workflow can be used:
 7. get.caa, for calculating catch- and weight-at-age
 8. get.cal, for calculating caught length-at-age 
 9. armatrix.fit and plots for smoothing and filling gaps of e.g., weight-at-age
+
+# Example
+
+Yet to write
+
+# Questions
+
+## If gear, period or area is NA, what does get.samples do?
+
+If there is no gear/period/area for a length-frequency or age-length sample, than that sample will still be used for the best matching landings (igorning the missing level).
+Example:
+sample [gear NA / period 1 / area 1] will be used for landings [gear 1, 2 or 3 / period 1 / area 1]
